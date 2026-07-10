@@ -1,0 +1,191 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Core neutrals and brand */
+  --background: #f8fafc; /* light bg */
+  --foreground: #0f172a; /* ink */
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+
+  --primary: #007bff; /* brand blue */
+  --primary-foreground: #ffffff;
+
+  /* Use teal as accent/success */
+  --accent: #00c6a9;
+  --accent-foreground: #0f172a;
+
+  /* Secondary/muted derived from background/foreground mix */
+  --secondary: color-mix(in oklab, var(--background) 92%, var(--foreground) 8%);
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in oklab, var(--background) 92%, var(--foreground) 8%);
+  --muted-foreground: color-mix(in oklab, var(--foreground) 60%, var(--background) 40%);
+
+  /* Status accents */
+  --success: #00c6a9;
+  --success-foreground: #f8fafc;
+  --warning: #ffaa33;
+  --warning-foreground: #0f172a;
+
+  /* Derived tokens */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: color-mix(in oklab, var(--foreground) 14%, var(--background) 86%);
+  --input: var(--border);
+  --ring: color-mix(in oklab, var(--primary) 50%, white 50%);
+
+  /* Charts (use directly via var(--chart-x)) */
+  --chart-1: #007bff; /* blue */
+  --chart-2: #00c6a9; /* teal */
+  --chart-3: #ffaa33; /* orange */
+  --chart-4: #0f172a; /* ink */
+  --chart-5: var(--foreground); /* neutral line/text */
+
+  --radius: 0.625rem;
+
+  /* Sidebar tokens */
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+.dark {
+  --background: #0f172a; /* dark bg */
+  --foreground: #f8fafc; /* light text */
+
+  --card: #0f172a;
+  --card-foreground: var(--foreground);
+  --popover: #0f172a;
+  --popover-foreground: var(--foreground);
+
+  --primary: #007bff;
+  --primary-foreground: #ffffff;
+
+  --secondary: color-mix(in oklab, var(--background) 70%, var(--foreground) 30%);
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in oklab, var(--background) 70%, var(--foreground) 30%);
+  --muted-foreground: color-mix(in oklab, var(--foreground) 80%, var(--background) 20%);
+
+  --accent: #00c6a9;
+  --accent-foreground: #f8fafc;
+
+  --success: #00c6a9;
+  --success-foreground: #f8fafc;
+  --warning: #ffaa33;
+  --warning-foreground: #0f172a;
+
+  --destructive: #f87171;
+  --destructive-foreground: #0f172a;
+
+  --border: color-mix(in oklab, var(--foreground) 16%, var(--background) 84%);
+  --input: var(--border);
+  --ring: color-mix(in oklab, var(--primary) 55%, black 45%);
+
+  --chart-1: #4ea3ff; /* lighten for dark bg */
+  --chart-2: #34e6c9;
+  --chart-3: #ffb955;
+  --chart-4: #e2e8f0;
+  --chart-5: var(--foreground);
+
+  --sidebar: #0d1424;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: color-mix(in oklab, var(--background) 70%, var(--foreground) 30%);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+/* Map custom tokens to Tailwind design tokens */
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* smooth theme toggle animation */
+.theme-smooth *,
+.theme-smooth ::before,
+.theme-smooth ::after {
+  transition: background-color .25s ease, color .25s ease, border-color .25s ease, fill .25s ease, stroke .25s ease;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* prevent horizontal scrollbar app-wide */
+    overflow-x: hidden;
+  }
+}
+
+.card-hover {
+  @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+}
+
+/* utility: ensures children don't force overflow on small screens */
+.responsive-container {
+  /* lets flex/grid children shrink instead of causing x-scroll */
+  min-width: 0;
+}
+
+/* utility: common chart heights across breakpoints */
+.chart-h {
+  height: 260px;
+}
+@media (min-width: 640px) {
+  .chart-h {
+    height: 300px;
+  }
+}

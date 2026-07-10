@@ -1,0 +1,253 @@
+{
+  "info": {
+    "_postman_id": "hospital-backend-complete-test",
+    "name": "Hospital Backend Full Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "auth", "login"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@hospital.com\",\n  \"password\": \"admin123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get Departments",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/departments" }
+      }
+    },
+    {
+      "name": "Update Department",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/departments/1" },
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"inactive\"\n}" }
+      }
+    },
+    {
+      "name": "Delete Department",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/departments/1" }
+      }
+    },
+    {
+      "name": "Get Doctors",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/doctors" }
+      }
+    },
+    {
+      "name": "Update Doctor",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/doctors/1" },
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"inactive\"\n}" }
+      }
+    },
+    {
+      "name": "Delete Doctor",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/doctors/1" }
+      }
+    },
+    {
+      "name": "Get Patients",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/patients" }
+      }
+    },
+    {
+      "name": "Update Patient",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/patients/1" },
+        "body": { "mode": "raw", "raw": "{\n  \"phone\": \"9876543210\"\n}" }
+      }
+    },
+    {
+      "name": "Delete Patient",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/patients/1" }
+      }
+    },
+    {
+      "name": "Get Appointments",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/appointments" }
+      }
+    },
+    {
+      "name": "Update Appointment",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/appointments/1" },
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"completed\"\n}" }
+      }
+    },
+    {
+      "name": "Delete Appointment",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/appointments/1" }
+      }
+    },
+    {
+      "name": "Get Payments",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/payments" }
+      }
+    },
+    {
+      "name": "Update Payment",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/payments/1" },
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"pending\"\n}" }
+      }
+    },
+    {
+      "name": "Delete Payment",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/payments/1" }
+      }
+    },
+    {
+      "name": "Get DSA Profiles",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/dsas" }
+      }
+    },
+    {
+      "name": "Update DSA Profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/dsas/1" },
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"inactive\"\n}" }
+      }
+    },
+    {
+      "name": "Delete DSA Profile",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/dsas/1" }
+      }
+    },
+    {
+      "name": "Get Procedures",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/procedures" }
+      }
+    },
+    {
+      "name": "Update Procedure",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/procedures/1" },
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"inactive\"\n}" }
+      }
+    },
+    {
+      "name": "Delete Procedure",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{JWT_TOKEN}}" }
+        ],
+        "url": { "raw": "http://localhost:5000/api/procedures/1" }
+      }
+    }
+  ]
+}

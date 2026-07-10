@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        Int         @id @default(autoincrement())
+  email     String      @unique
+  password  String
+  name      String
+  roleId    Int         @default(1) // Assuming 1 is the roleId for Admin
+  createdAt DateTime    @default(now())
+  role      Role        @relation(fields: [roleId], references: [id])
+}
+
+model Doctor {
+  id           Int           @id @default(autoincrement())
+  name         String
+  departmentId Int
+  email        String        @unique
+  password     String
+  roleId       Int         @default(2) // Assuming 2 is the roleId for Doctor
+  status       String
+  createdAt    DateTime      @default(now())
+  appointments Appointment[]
+  department   Department    @relation(fields: [departmentId], references: [id])
+  role         Role          @relation(fields: [roleId], references: [id])
+  // user         User?         @relation("UserDoctor")
+}
+
+model DSAProfile {
+  id            Int      @id @default(autoincrement())
+  name          String
+  fatherName    String
+  cnic          String   @unique
+  address       String
+  qualification String
+  joiningDate   DateTime
+  contactNo     String
+  status        String
+  roleId       Int      @default(3) // Assuming 3 is the roleId for DSA
+  // user          User?    @relation("UserDSA")
+  role         Role     @relation(fields: [roleId], references: [id])
+}
+
+model Patient {
+  id            Int           @id @default(autoincrement())
+  mrNo          String        @unique
+  registration  DateTime
+  fullName      String
+  sex           String
+  age           Int
+  maritalStatus String
+  phone         String
+  email         String?
+  occupation    String?
+  address       String
+  membership    String
+  status        String
+  fee           Float
+  createdAt     DateTime      @default(now())
+  appointments  Appointment[]
+  payments      Payment[]
+}
+
+model Appointment {
+  id           Int        @id @default(autoincrement())
+  patientId    Int
+  doctorId     Int
+  type         String
+  departmentId Int
+  date         DateTime
+  time         String
+  day          String
+  tokenNo      Int
+  appointNo    Int
+  reason       String?
+  status       String
+  createdAt    DateTime   @default(now())
+  department   Department @relation(fields: [departmentId], references: [id])
+  doctor       Doctor     @relation(fields: [doctorId], references: [id])
+  patient      Patient    @relation(fields: [patientId], references: [id])
+}
+
+model Payment {
+  id         Int      @id @default(autoincrement())
+  patientId  Int
+  date       DateTime
+  method     String
+  mrNo       String
+  preBalance Float
+  netTotal   Float
+  paid       Float
+  xrayCharge Float
+  xrayPaid   Float
+  status     String
+  patient    Patient  @relation(fields: [patientId], references: [id])
+}
+
+model Procedure {
+  id              Int        @id @default(autoincrement())
+  name            String
+  departmentId    Int
+  cost            Float
+  effectiveDate   DateTime
+  status          String
+  displaySequence Int
+  department      Department @relation(fields: [departmentId], references: [id])
+}
+
+model Department {
+  id              Int           @id @default(autoincrement())
+  name            String        @unique
+  status          String
+  displaySequence Int
+  appointments    Appointment[]
+  doctors         Doctor[]
+  procedures      Procedure[]
+}
+
+model Role {
+  id     Int      @id @default(autoincrement())
+  name   String   @unique
+  Doctor Doctor[]
+  
+  // users  User[]
+
+  Admin Admin[]
+
+  DSAProfile DSAProfile[]
+}
