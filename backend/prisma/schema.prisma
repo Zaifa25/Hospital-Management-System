@@ -37,6 +37,8 @@ model DSAProfile {
   name          String
   fatherName    String
   cnic          String   @unique
+  email         String   @unique
+  password      String
   address       String
   qualification String
   joiningDate   DateTime
@@ -132,4 +134,19 @@ model Role {
   Admin Admin[]
 
   DSAProfile DSAProfile[]
+
+  Receptionist Receptionist[]
+}
+
+model Receptionist {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  address   String?
+  status    String   @default("Active")
+  roleId    Int      @default(4)
+  createdAt DateTime @default(now())
+  role      Role     @relation(fields: [roleId], references: [id])
 }

@@ -128,7 +128,7 @@ export const entityConfigs: Record<string, EntityConfig> = {
     description: "Create, update, and manage Discharge/Support Assistants.",
     endpoint: "/dsas",
     // createdAt is set by the backend when the DSA is created
-    defaults: { name: "", fatherName: "", cnic: "", address: "", contactNo: "", qualification: "", joiningDate: "", status: "active" },
+    defaults: { name: "", fatherName: "", cnic: "", address: "", contactNo: "", qualification: "", joiningDate: "", status: "active", email: "", password: "" },
     schema: z.object({
       id: z.any().optional(),
       name: z.string().min(2),
@@ -139,6 +139,8 @@ export const entityConfigs: Record<string, EntityConfig> = {
       qualification: z.string().min(2),
       joiningDate: z.string().transform((val) => new Date(val).toISOString()),
       status: z.enum(["active", "inactive"]),
+      email: z.string().email(),
+      password: z.string().min(6).optional(),
     }),
     fields: [
       { name: "name", label: "Name", placeholder: "John Doe" },
@@ -153,6 +155,8 @@ export const entityConfigs: Record<string, EntityConfig> = {
         inputType: "datetime-local",
         coerce: (v: string) => new Date(v).toISOString(),
       },
+      { name: "email", label: "Email", inputType: "email", placeholder: "dsa@hospital.com" },
+      { name: "password", label: "Password", inputType: "password", placeholder: "••••••••" },
       { name: "status", label: "Status", type: "select", options: statusOptions },
     ],
     columns: ({ onEdit, onDelete }) => [
@@ -701,6 +705,67 @@ export const entityConfigs: Record<string, EntityConfig> = {
       { header: "Effective Date", accessorKey: "effectiveDate" },
       { header: "Status", accessorKey: "status" },
       { header: "Sequence", accessorKey: "displaySequence" },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => onEdit(row.original)}>
+              Edit
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => onDelete(row.original)}>
+              Delete
+            </Button>
+          </div>
+        ),
+      },
+    ],
+  },
+
+  receptionists: {
+    key: "receptionists",
+    title: "Receptionist Management",
+    single: "Receptionist",
+    description: "Create, update, and manage receptionists.",
+    endpoint: "/receptionists",
+    defaults: { name: "", email: "", phone: "", address: "", status: "Active", password: "" },
+    schema: z.object({
+      id: z.any().optional(),
+      name: z.string().min(2),
+      email: z.string().email(),
+      phone: z.string().optional(),
+      address: z.string().optional(),
+      status: z.enum(["Active", "Inactive", "active", "inactive"]).optional().default("Active"),
+      password: z.string().min(6).optional(),
+    }),
+    fields: [
+      { name: "name", label: "Name", placeholder: "Jane Doe" },
+      { name: "email", label: "Email", inputType: "email", placeholder: "receptionist@hospital.com" },
+      { name: "phone", label: "Phone", placeholder: "03001234567" },
+      { name: "address", label: "Address", placeholder: "123 Main St" },
+      { name: "status", label: "Status", type: "select", options: [
+        { label: "Active", value: "Active" },
+        { label: "Inactive", value: "Inactive" },
+      ] },
+      { name: "password", label: "Password", inputType: "password", placeholder: "••••••••" },
+    ],
+    columns: ({ onEdit, onDelete }) => [
+      { header: "Name", accessorKey: "name" },
+      { header: "Email", accessorKey: "email" },
+      { header: "Phone", accessorKey: "phone" },
+      { header: "Address", accessorKey: "address" },
+      {
+        header: "Status",
+        accessorKey: "status",
+        cell: ({ getValue }) => {
+          const v = String(getValue())
+          return (
+            <Badge variant={v.toLowerCase() === "active" ? "default" : "secondary"} className="capitalize">
+              {v}
+            </Badge>
+          )
+        },
+      },
       {
         id: "actions",
         header: "Actions",

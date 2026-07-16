@@ -24,9 +24,24 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Unauthorized: Token missing user id' });
     }
 
-    // Check user exists
-    
-    const user = await prisma.admin.findUnique({ where: { id: Number(decoded.id) } });
+    // Check user exists based on roleId
+    let user = null;
+    const userId = Number(decoded.id);
+    const roleId = Number(decoded.roleId);
+
+    if (roleId === 1) {
+      user = await prisma.admin.findUnique({ where: { id: userId } });
+    } else if (roleId === 2) {
+      user = await prisma.doctor.findUnique({ where: { id: userId } });
+    } else if (roleId === 3) {
+      user = await prisma.dSAProfile.findUnique({ where: { id: userId } });
+    } else if (roleId === 4) {
+      user = await prisma.receptionist.findUnique({ where: { id: userId } });
+    } else {
+      user = await prisma.admin.findUnique({ where: { id: userId } }) || 
+             await prisma.doctor.findUnique({ where: { id: userId } });
+    }
+
     if (!user) return res.status(401).json({ message: 'Unauthorized: User not found' });
 
     req.user = user;
@@ -42,4 +57,6 @@ const authorize = (roles) => (req, res, next) => {
   }
   next();
 };
-module.exports = authMiddleware, authorize;
+
+authMiddleware.authorize = authorize;
+module.exports = authMiddleware;

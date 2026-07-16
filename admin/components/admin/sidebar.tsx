@@ -31,6 +31,7 @@ const links: NavLink[] = [
   { href: "/admin/analytics", label: "Analytics", icon: Activity },
   { href: "/admin/doctors", label: "Doctors", icon: Stethoscope, allowRoles: [1] },
   { href: "/admin/dsas", label: "DSAs", icon: Users, allowRoles: [1] },
+  { href: "/admin/receptionists", label: "Receptionists", icon: Users, allowRoles: [1] },
   { href: "/admin/patients", label: "Patients", icon: Users },
   { href: "/admin/appointments", label: "Appointments", icon: CalendarDays },
   { href: "/admin/payments", label: "Payments", icon: CreditCard, allowRoles: [1, 3] },
@@ -43,6 +44,7 @@ const roleBadge: Record<number, { label: string; color: string }> = {
   1: { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" },
   2: { label: "Doctor", color: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
   3: { label: "DSA", color: "bg-amber-500/10 text-amber-600 border-amber-200" },
+  4: { label: "Receptionist", color: "bg-blue-500/10 text-blue-600 border-blue-200" },
 }
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {

@@ -1,9 +1,14 @@
 const prisma = require('../config/db');
+const bcrypt = require('bcryptjs');
 
 // Create DSA profile
 const createDSA = async (req, res) => {
   try {
-    const dsa = await prisma.dSAProfile.create({ data: req.body });
+    const data = { ...req.body };
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+    const dsa = await prisma.dSAProfile.create({ data });
     res.json(dsa);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -35,9 +40,13 @@ const getDSAById = async (req, res) => {
 const updateDSA = async (req, res) => {
   const { id } = req.params;
   try {
+    const data = { ...req.body };
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
     const updated = await prisma.dSAProfile.update({
       where: { id: parseInt(id) },
-      data: req.body
+      data
     });
     res.json(updated);
   } catch (err) {

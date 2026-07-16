@@ -27,11 +27,11 @@ export function CRUDPage({ config }: { config: EntityConfig }) {
   )
 
   // Use full API URL for departments to match backend (axios calls below use same base)
-  const useAxiosApi = config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients" || config.key==="procedures" || config.key==="payments" || config.key==="appointments"
+  const useAxiosApi = config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients" || config.key==="procedures" || config.key==="payments" || config.key==="appointments" || config.key==="receptionists"
   const swrKey = useAxiosApi ? `http://localhost:5000/api${config.endpoint}?${params}` : `${config.endpoint}?${params}`
 
   const fetcher = async (url: string) => {
-    if (config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients" || config.key==="procedures" || config.key==="payments" || config.key==="appointments") {
+    if (config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients" || config.key==="procedures" || config.key==="payments" || config.key==="appointments" || config.key==="receptionists") {
       const token = localStorage.getItem("hms_jwt")
       const res = await axios.get(url, {
         headers: {
@@ -105,7 +105,7 @@ export function CRUDPage({ config }: { config: EntityConfig }) {
 
   async function handleDelete(row: any) {
     try {
-  if (config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients"|| config.key==="procedures" || config.key==="payments" || config.key==="appointments") {
+  if (config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients"|| config.key==="procedures" || config.key==="payments" || config.key==="appointments" || config.key==="receptionists") {
         const token = localStorage.getItem("hms_jwt")
         await axios.delete(`http://localhost:5000/api${config.endpoint}/${row.id}`, {
           headers: {

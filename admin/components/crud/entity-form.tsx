@@ -57,7 +57,7 @@ export function EntityForm({
     try {
       const isUpdate = Boolean(values.id)
       // Use axios for departments, doctors, dsas, and patients entities
-      if (config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients" || config.key==="procedures" || config.key==="payments" || config.key==="appointments") {
+      if (config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients" || config.key==="procedures" || config.key==="payments" || config.key==="appointments" || config.key==="receptionists") {
         const url = `http://localhost:5000/api${isUpdate ? `${config.endpoint}/${values.id}` : config.endpoint}`
         const token = localStorage.getItem("hms_jwt")
 

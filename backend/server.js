@@ -10,6 +10,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const dsaRoutes = require('./routes/dsaRoutes');
 const procedureRoutes = require('./routes/procedureRoutes');
+const receptionistRoutes = require('./routes/receptionistRoutes');
 
 dotenv.config();
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/dsas', dsaRoutes);
 app.use('/api/procedures', procedureRoutes);
+app.use('/api/receptionists', receptionistRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

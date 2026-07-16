@@ -45,12 +45,24 @@ const registerAdmin = async (req, res) => {
 
 // Login checking both Admin and Doctor tables
 const adminLogin = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
-  let user = await prisma.admin.findUnique({ where: { email } });
-  if (!user) {
-    // Check doctor table
+  let user = null;
+
+  if (role === 'admin') {
+    user = await prisma.admin.findUnique({ where: { email } });
+  } else if (role === 'doctor') {
     user = await prisma.doctor.findUnique({ where: { email } });
+  } else if (role === 'receptionist') {
+    user = await prisma.receptionist.findUnique({ where: { email } });
+  } else if (role === 'dsa') {
+    user = await prisma.dSAProfile.findUnique({ where: { email } });
+  } else {
+    // Fallback if role is not provided
+    user = await prisma.admin.findUnique({ where: { email } });
+    if (!user) user = await prisma.doctor.findUnique({ where: { email } });
+    if (!user) user = await prisma.receptionist.findUnique({ where: { email } });
+    if (!user) user = await prisma.dSAProfile.findUnique({ where: { email } });
   }
 
   if (!user) return res.status(401).json({ message: 'Invalid email or password' });

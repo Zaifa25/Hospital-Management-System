@@ -17,6 +17,11 @@ async function seedRoles() {
       update: {},
       create: { id: 3, name: 'DSA' },
     });
+    await prisma.role.upsert({
+      where: { id: 4 },
+      update: {},
+      create: { id: 4, name: 'Receptionist' },
+    });
     console.log('Roles seeded successfully.');
   } catch (err) {
     console.error('Error seeding roles:', err);

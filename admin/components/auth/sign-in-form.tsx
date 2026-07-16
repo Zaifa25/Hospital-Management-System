@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
 import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
@@ -22,6 +23,7 @@ function getApiBaseUrl() {
 }
 
 const schema = z.object({
+  role: z.enum(["admin", "doctor", "receptionist", "dsa"]),
   email: z.string().email(),
   password: z.string().min(6, "Password must be at least 6 characters"),
 })
@@ -32,8 +34,10 @@ export function SignInForm() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) })
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { role: "admin" } })
   const [loading, setLoading] = useState(false)
   const { setToken } = useAuth()
   const router = useRouter()
@@ -44,10 +48,11 @@ export function SignInForm() {
       const res = await axios.post(`${getApiBaseUrl()}/api/auth/login`, values)
       
       const admin = res.data.admin
-      const roleMap: Record<number, "admin" | "doctor" | "dsa"> = {
+      const roleMap: Record<number, "admin" | "doctor" | "dsa" | "receptionist"> = {
         1: "admin",
         2: "doctor",
         3: "dsa",
+        4: "receptionist",
       }
       const role = roleMap[admin?.roleId ?? 1] || "admin"
 
@@ -69,6 +74,24 @@ export function SignInForm() {
 
   return (
     <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
+      <div className="space-y-1">
+        <Label htmlFor="role">Sign in as</Label>
+        <Select
+          value={watch("role")}
+          onValueChange={(val: "admin" | "doctor" | "receptionist" | "dsa") => setValue("role", val, { shouldValidate: true })}
+        >
+          <SelectTrigger id="role">
+            <SelectValue placeholder="Select Role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="doctor">Doctor</SelectItem>
+            <SelectItem value="receptionist">Receptionist</SelectItem>
+            <SelectItem value="dsa">DSA</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}
+      </div>
       <div className="space-y-1">
         <Label htmlFor="email">Email</Label>
         <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
