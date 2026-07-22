@@ -74,12 +74,37 @@ export function EntityForm({
 
         console.log('Sending data to server:', data) // Debug log
 
+        const hasFile = Object.values(data).some(v => v instanceof File || (typeof FileList !== "undefined" && v instanceof FileList && v.length > 0));
+
+        let requestData;
+        let contentType;
+
+        if (hasFile) {
+          const formData = new FormData();
+          Object.entries(data).forEach(([k, v]) => {
+            if (v !== undefined && v !== null && v !== "") {
+              if (typeof FileList !== "undefined" && v instanceof FileList && v.length > 0) {
+                formData.append(k, v[0]);
+              } else if (v instanceof File) {
+                formData.append(k, v);
+              } else {
+                formData.append(k, String(v));
+              }
+            }
+          });
+          requestData = formData;
+          contentType = "multipart/form-data";
+        } else {
+          requestData = data;
+          contentType = "application/json";
+        }
+
         const response = await axios({
           url,
           method: isUpdate ? "put" : "post",
-          data,
+          data: requestData,
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": contentType,
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
         })
@@ -187,13 +212,26 @@ export function EntityForm({
         return (
           <div className="space-y-1" key={f.name}>
             <Label htmlFor={f.name}>{f.label}</Label>
-            <Input 
-              id={f.name} 
-              placeholder={f.placeholder} 
-              type={f.inputType ?? "text"} 
-              readOnly={config.key === "appointments" && (f.name === "tokenNo" || f.name === "appointNo")}
-              {...form.register(key)} 
-            />
+            {f.inputType === "file" ? (
+              <Input 
+                id={f.name} 
+                type="file" 
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    form.setValue(key, e.target.files[0], { shouldValidate: true })
+                  }
+                }}
+              />
+            ) : (
+              <Input 
+                id={f.name} 
+                placeholder={f.placeholder} 
+                type={f.inputType ?? "text"} 
+                readOnly={config.key === "appointments" && (f.name === "tokenNo" || f.name === "appointNo")}
+                {...form.register(key)} 
+              />
+            )}
             {form.formState.errors[key]?.message ? (
               <p className="text-xs text-destructive">{String(form.formState.errors[key]?.message)}</p>
             ) : null}

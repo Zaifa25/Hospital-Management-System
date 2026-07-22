@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   ArrowLeft,
   Stethoscope,
@@ -94,27 +95,59 @@ export default function DoctorSchedulePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => router.back()} className="gap-1.5">
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Stethoscope className="h-5 w-5 text-primary" />
-            {loading ? <Skeleton className="h-7 w-40" /> : (doctor?.name ?? "Doctor Schedule")}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {loading ? <Skeleton className="h-4 w-48 mt-1" /> : (
-              <>
-                {doctor?.department?.name || doctor?.email}
-                {" · "}
-                <Badge variant={doctor?.status === "active" ? "default" : "secondary"} className="text-xs capitalize ml-1">
-                  {doctor?.status}
-                </Badge>
-              </>
+      <div className="flex flex-col md:flex-row md:items-center gap-4 border-b pb-6">
+        <div className="flex items-start md:items-center gap-3 w-full">
+          <Button variant="ghost" size="sm" onClick={() => router.back()} className="gap-1.5 shrink-0 self-start md:self-auto mt-2 md:mt-0">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <div className="flex flex-col md:flex-row md:items-center gap-4 flex-1">
+            {loading ? (
+              <Skeleton className="h-20 w-20 rounded-full shrink-0" />
+            ) : (
+              <Avatar className="h-20 w-20 border-2 border-primary/10 shrink-0">
+                <AvatarImage src={doctor?.profilePicture ? `http://localhost:5000${doctor.profilePicture}` : undefined} alt={doctor?.name} className="object-cover" />
+                <AvatarFallback className="text-xl bg-primary/5 text-primary">
+                  {doctor?.name?.substring(0, 2).toUpperCase() || <Stethoscope className="h-8 w-8" />}
+                </AvatarFallback>
+              </Avatar>
             )}
-          </p>
+            
+            <div className="flex-1 space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                {loading ? <Skeleton className="h-7 w-40" /> : (doctor?.name ?? "Doctor Profile")}
+              </h1>
+              <p className="text-sm text-muted-foreground flex flex-wrap gap-1">
+                {loading ? <Skeleton className="h-4 w-48 mt-1" /> : (
+                  <>
+                    <span className="font-medium text-foreground">{doctor?.department?.name || "No Department"}</span>
+                    {doctor?.qualification && <span>&bull; {doctor.qualification}</span>}
+                    {doctor?.experience && <span>&bull; {doctor.experience} Experience</span>}
+                    {doctor?.email && <span>&bull; {doctor.email}</span>}
+                  </>
+                )}
+              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                {loading ? <Skeleton className="h-5 w-20" /> : (
+                  <Badge variant={doctor?.status === "active" ? "default" : "secondary"} className="text-xs capitalize">
+                    {doctor?.status}
+                  </Badge>
+                )}
+                {!loading && doctor?.phone && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground gap-1 font-normal bg-muted/30">
+                    <Hash className="h-3 w-3" />
+                    {doctor.phone}
+                  </Badge>
+                )}
+                {!loading && doctor?.address && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground gap-1 font-normal bg-muted/30">
+                    <Building2 className="h-3 w-3" />
+                    {doctor.address}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

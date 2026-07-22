@@ -18,17 +18,22 @@ model Admin {
 }
 
 model Doctor {
-  id           Int           @id @default(autoincrement())
-  name         String
-  departmentId Int
-  email        String        @unique
-  password     String
-  roleId       Int         @default(2) // Assuming 2 is the roleId for Doctor
-  status       String
-  createdAt    DateTime      @default(now())
-  appointments Appointment[]
-  department   Department    @relation(fields: [departmentId], references: [id])
-  role         Role          @relation(fields: [roleId], references: [id])
+  id             Int           @id @default(autoincrement())
+  name           String
+  departmentId   Int
+  email          String        @unique
+  password       String
+  roleId         Int           @default(2) // Assuming 2 is the roleId for Doctor
+  status         String
+  profilePicture String?
+  phone          String?
+  qualification  String?
+  experience     String?
+  address        String?
+  createdAt      DateTime      @default(now())
+  appointments   Appointment[]
+  department     Department    @relation(fields: [departmentId], references: [id])
+  role           Role          @relation(fields: [roleId], references: [id])
   // user         User?         @relation("UserDoctor")
 }
 

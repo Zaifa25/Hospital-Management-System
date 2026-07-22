@@ -40,7 +40,11 @@ app.use(cors({
   },
   credentials: true
 }));
+const path = require('path');
 app.use(express.json());
+
+// Serve uploads folder statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API routes
 app.use('/api/auth', authRoutes);
