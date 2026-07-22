@@ -201,6 +201,18 @@ async function main() {
     }
   });
 
+  // 9. Admin User
+  await prisma.admin.upsert({
+    where: { email: 'admin@hospital.com' },
+    update: {},
+    create: {
+      name: 'Super Admin',
+      email: 'admin@hospital.com',
+      password: defaultPassword, // password123
+      roleId: 1,
+    }
+  });
+
   console.log('Successfully seeded Pakistan data!');
 }
 

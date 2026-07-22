@@ -106,9 +106,9 @@ export default function PatientHistoryPage() {
           <h1 className="text-2xl font-bold tracking-tight">
             {loading ? <Skeleton className="h-7 w-48" /> : patient?.fullName ?? "Patient History"}
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             {loading ? <Skeleton className="h-4 w-32 mt-1" /> : `MR# ${patient?.mrNo}`}
-          </p>
+          </div>
         </div>
       </div>
 
