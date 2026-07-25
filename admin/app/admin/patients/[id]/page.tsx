@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import axios from "axios"
+import { apiUrl, SERVER_ROOT } from "@/lib/env"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -60,12 +61,10 @@ export default function PatientHistoryPage() {
       try {
         const token = localStorage.getItem("hms_jwt")
         const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
-        const base = "http://localhost:5000/api"
-
         const [patientRes, apptRes, payRes] = await Promise.all([
-          axios.get(`${base}/patients/${id}`, { headers }),
-          axios.get(`${base}/appointments`, { headers }),
-          axios.get(`${base}/payments`, { headers }),
+          axios.get(apiUrl(`/patients/${id}`), { headers }),
+          axios.get(apiUrl("/appointments"), { headers }),
+          axios.get(apiUrl("/payments"), { headers }),
         ])
 
         setPatient(patientRes.data)

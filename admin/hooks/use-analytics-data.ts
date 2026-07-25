@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { apiUrl } from "@/lib/env"
 
 export type Period = "daily" | "weekly" | "monthly" | "yearly"
 
@@ -215,8 +216,8 @@ export function useAnalyticsData(period: Period = "monthly") {
         const token = localStorage.getItem("hms_jwt")
         const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
         const [appointmentsRes, paymentsRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/appointments", { headers }),
-          axios.get("http://localhost:5000/api/payments", { headers }),
+          axios.get(apiUrl("/appointments"), { headers }),
+          axios.get(apiUrl("/payments"), { headers }),
         ])
         const normalize = (res: any) => (Array.isArray(res) ? res : res?.data || res?.items || [])
         setRawPayments(normalize(paymentsRes.data))

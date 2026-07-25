@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { apiUrl } from "@/lib/env"
 
 export type PatientOption = {
   label: string
@@ -20,7 +21,7 @@ export function usePatients() {
       setError(null)
       try {
         const token = localStorage.getItem("hms_jwt")
-        const res = await axios.get("http://localhost:5000/api/patients", {
+        const res = await axios.get(apiUrl("/patients"), {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         })
         let data = res.data

@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/hooks/use-auth"
 
-const BASE = typeof window !== "undefined" ? process.env.NEXT_PUBLIC_API_BASE_URL || "" : ""
+const BASE = typeof window !== "undefined" ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api") : ""
 
 export async function fetcher(path: string) {
   const url = withBase(path)

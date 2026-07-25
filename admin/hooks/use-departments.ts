@@ -2,6 +2,7 @@
 
 import useSWR from "swr"
 import axios from "axios"
+import { apiUrl } from "@/lib/env"
 
 export function useDepartments() {
   const fetcher = async (url: string) => {
@@ -17,7 +18,7 @@ export function useDepartments() {
   }
 
   const { data, error, isLoading } = useSWR<any[]>(
-    "http://localhost:5000/api/departments",
+    apiUrl("/departments"),
     fetcher,
     { refreshInterval: 30000 } // Refresh every 30 seconds
   )

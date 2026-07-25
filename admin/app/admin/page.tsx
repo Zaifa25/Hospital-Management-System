@@ -145,8 +145,6 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <div>Total Departments: <strong>{stats.totalDepartments}</strong></div>
-            <div>Total Procedures: <strong>{stats.totalProcedures}</strong></div>
-            <div>Total DSAs: <strong>{stats.totalDSAs}</strong></div>
             <p className="text-xs mt-4">All data is fetched from the database in real-time. Dashboard updates automatically.</p>
           </CardContent>
         </Card>

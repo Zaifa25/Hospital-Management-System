@@ -30,6 +30,7 @@ model Doctor {
   qualification  String?
   experience     String?
   address        String?
+  description    String?
   createdAt      DateTime      @default(now())
   appointments   Appointment[]
   department     Department    @relation(fields: [departmentId], references: [id])
@@ -127,20 +128,17 @@ model Department {
   appointments    Appointment[]
   doctors         Doctor[]
   procedures      Procedure[]
+  employees       Employee[]
 }
 
 model Role {
-  id     Int      @id @default(autoincrement())
-  name   String   @unique
-  Doctor Doctor[]
-  
-  // users  User[]
-
-  Admin Admin[]
-
-  DSAProfile DSAProfile[]
-
+  id           Int            @id @default(autoincrement())
+  name         String         @unique
+  Doctor       Doctor[]
+  Admin        Admin[]
+  DSAProfile   DSAProfile[]
   Receptionist Receptionist[]
+  HRProfile    HRProfile[]
 }
 
 model Receptionist {
@@ -154,4 +152,62 @@ model Receptionist {
   roleId    Int      @default(4)
   createdAt DateTime @default(now())
   role      Role     @relation(fields: [roleId], references: [id])
+}
+
+model HRProfile {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  address   String?
+  status    String   @default("Active")
+  roleId    Int      @default(5)
+  createdAt DateTime @default(now())
+  role      Role     @relation(fields: [roleId], references: [id])
+}
+
+model Employee {
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String       @unique
+  phone        String
+  cnic         String?
+  type         String       // Doctor, Nurse, Staff, Receptionist, Admin, Technician
+  designation  String
+  departmentId Int?
+  salary       Float
+  joiningDate  DateTime     @default(now())
+  status       String       @default("active") // active, on_leave, resigned
+  address      String?
+  createdAt    DateTime     @default(now())
+  attendances  Attendance[]
+  payrolls     Payroll[]
+  department   Department?  @relation(fields: [departmentId], references: [id])
+}
+
+model Attendance {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  date       DateTime @default(now())
+  status     String   // Present, Absent, Late, Half-day, On Leave
+  checkIn    String?
+  checkOut   String?
+  notes      String?
+  createdAt  DateTime @default(now())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model Payroll {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  month       String   // e.g. "July 2026"
+  basicSalary Float
+  bonus       Float    @default(0)
+  deductions  Float    @default(0)
+  netSalary   Float
+  status      String   @default("Pending") // Pending, Paid
+  paymentDate DateTime?
+  createdAt   DateTime @default(now())
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }

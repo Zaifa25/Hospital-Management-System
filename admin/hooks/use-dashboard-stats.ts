@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { apiUrl } from "@/lib/env"
 
 export type DashboardStats = {
   totalAppointments: number
@@ -7,8 +8,6 @@ export type DashboardStats = {
   totalDoctors: number
   totalPayments: number
   totalDepartments: number
-  totalProcedures: number
-  totalDSAs: number
   recentAppointments: any[]
   recentPayments: any[]
 }
@@ -20,8 +19,6 @@ export function useDashboardStats() {
     totalDoctors: 0,
     totalPayments: 0,
     totalDepartments: 0,
-    totalProcedures: 0,
-    totalDSAs: 0,
     recentAppointments: [],
     recentPayments: [],
   })
@@ -36,14 +33,12 @@ export function useDashboardStats() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         }
 
-        const [patientsRes, appointmentsRes, doctorsRes, paymentsRes, deptsRes, procsRes, dsasRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/patients", { headers }),
-          axios.get("http://localhost:5000/api/appointments", { headers }),
-          axios.get("http://localhost:5000/api/doctors", { headers }),
-          axios.get("http://localhost:5000/api/payments", { headers }),
-          axios.get("http://localhost:5000/api/departments", { headers }),
-          axios.get("http://localhost:5000/api/procedures", { headers }),
-          axios.get("http://localhost:5000/api/dsas", { headers }),
+        const [patientsRes, appointmentsRes, doctorsRes, paymentsRes, deptsRes] = await Promise.all([
+          axios.get(apiUrl("/patients"), { headers }),
+          axios.get(apiUrl("/appointments"), { headers }),
+          axios.get(apiUrl("/doctors"), { headers }),
+          axios.get(apiUrl("/payments"), { headers }),
+          axios.get(apiUrl("/departments"), { headers }),
         ])
 
         // Normalize response shapes
@@ -54,8 +49,6 @@ export function useDashboardStats() {
         const doctors = normalize(doctorsRes.data)
         const payments = normalize(paymentsRes.data)
         const departments = normalize(deptsRes.data)
-        const procedures = normalize(procsRes.data)
-        const dsas = normalize(dsasRes.data)
 
         // Create lookup maps for relationships
         const patientMap = new Map(patients.map((p: any) => [p.id, p]))
@@ -82,8 +75,6 @@ export function useDashboardStats() {
           totalDoctors: doctors.length,
           totalPayments: payments.length,
           totalDepartments: departments.length,
-          totalProcedures: procedures.length,
-          totalDSAs: dsas.length,
           recentAppointments: enrichedAppointments,
           recentPayments: enrichedPayments,
         })

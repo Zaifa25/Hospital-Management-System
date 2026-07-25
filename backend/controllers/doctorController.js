@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const createDoctor = async (req, res) => {
   try {
-    const { name, email, departmentId, status, password, phone, qualification, experience, address } = req.body;
+    const { name, email, departmentId, status, password, phone, qualification, experience, address, description } = req.body;
     if (!name || !email || !departmentId || !status || !password) {
       return res.status(400).json({ message: 'Missing required fields.' });
     }
@@ -12,7 +12,6 @@ const createDoctor = async (req, res) => {
     if (req.file) {
       profilePicture = `/uploads/profiles/${req.file.filename}`;
     }
-    console.log("DATA", req.body);
     const doctor = await prisma.doctor.create({
       data: {
         name,
@@ -24,8 +23,9 @@ const createDoctor = async (req, res) => {
         qualification,
         experience,
         address,
+        description: description || null,
         profilePicture,
-        roleId: 2 // Ensure Doctor roleId is set
+        roleId: 2
       }
     });
     res.json(doctor);

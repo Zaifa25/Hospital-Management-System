@@ -55,6 +55,8 @@ const adminLogin = async (req, res) => {
     user = await prisma.doctor.findUnique({ where: { email } });
   } else if (role === 'receptionist') {
     user = await prisma.receptionist.findUnique({ where: { email } });
+  } else if (role === 'hr') {
+    user = await prisma.hRProfile.findUnique({ where: { email } });
   } else if (role === 'dsa') {
     user = await prisma.dSAProfile.findUnique({ where: { email } });
   } else {
@@ -62,6 +64,7 @@ const adminLogin = async (req, res) => {
     user = await prisma.admin.findUnique({ where: { email } });
     if (!user) user = await prisma.doctor.findUnique({ where: { email } });
     if (!user) user = await prisma.receptionist.findUnique({ where: { email } });
+    if (!user) user = await prisma.hRProfile.findUnique({ where: { email } });
     if (!user) user = await prisma.dSAProfile.findUnique({ where: { email } });
   }
 

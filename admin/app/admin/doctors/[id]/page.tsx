@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import axios from "axios"
+import { apiUrl, SERVER_ROOT } from "@/lib/env"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -38,17 +39,16 @@ export default function DoctorSchedulePage() {
   const [appointments, setAppointments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activeDay, setActiveDay] = useState<string>("all")
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
       try {
         const token = localStorage.getItem("hms_jwt")
         const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
-        const base = "http://localhost:5000/api"
-
         const [doctorRes, apptRes] = await Promise.all([
-          axios.get(`${base}/doctors/${id}`, { headers }),
-          axios.get(`${base}/appointments`, { headers }),
+          axios.get(apiUrl(`/doctors/${id}`), { headers }),
+          axios.get(apiUrl("/appointments"), { headers }),
         ])
 
         setDoctor(doctorRes.data)
@@ -61,8 +61,10 @@ export default function DoctorSchedulePage() {
           .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
         setAppointments(doctorAppts)
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load doctor schedule:", err)
+        const failedUrl = err?.config?.url || "Unknown URL"
+        setFetchError(`[${failedUrl}] ${err?.response?.data?.message || err?.message || String(err)} (Status: ${err?.response?.status})`)
       } finally {
         setLoading(false)
       }
@@ -106,7 +108,7 @@ export default function DoctorSchedulePage() {
               <Skeleton className="h-20 w-20 rounded-full shrink-0" />
             ) : (
               <Avatar className="h-20 w-20 border-2 border-primary/10 shrink-0">
-                <AvatarImage src={doctor?.profilePicture ? `http://localhost:5000${doctor.profilePicture}` : undefined} alt={doctor?.name} className="object-cover" />
+                <AvatarImage src={doctor?.profilePicture ? `${SERVER_ROOT}${doctor.profilePicture}` : undefined} alt={doctor?.name} className="object-cover" />
                 <AvatarFallback className="text-xl bg-primary/5 text-primary">
                   {doctor?.name?.substring(0, 2).toUpperCase() || <Stethoscope className="h-8 w-8" />}
                 </AvatarFallback>
@@ -117,7 +119,7 @@ export default function DoctorSchedulePage() {
               <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                 {loading ? <Skeleton className="h-7 w-40" /> : (doctor?.name ?? "Doctor Profile")}
               </h1>
-              <p className="text-sm text-muted-foreground flex flex-wrap gap-1">
+              <div className="text-sm text-muted-foreground flex flex-wrap gap-1">
                 {loading ? <Skeleton className="h-4 w-48 mt-1" /> : (
                   <>
                     <span className="font-medium text-foreground">{doctor?.department?.name || "No Department"}</span>
@@ -126,7 +128,7 @@ export default function DoctorSchedulePage() {
                     {doctor?.email && <span>&bull; {doctor.email}</span>}
                   </>
                 )}
-              </p>
+              </div>
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 {loading ? <Skeleton className="h-5 w-20" /> : (
                   <Badge variant={doctor?.status === "active" ? "default" : "secondary"} className="text-xs capitalize">
@@ -146,6 +148,11 @@ export default function DoctorSchedulePage() {
                   </Badge>
                 )}
               </div>
+              {!loading && doctor?.description && (
+                <div className="mt-4 pt-3 border-t text-sm text-muted-foreground leading-relaxed max-w-3xl">
+                  {doctor.description}
+                </div>
+              )}
             </div>
           </div>
         </div>

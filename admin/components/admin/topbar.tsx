@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
 import { Menu } from "lucide-react"
 import axios from "axios"
+import { apiUrl } from "@/lib/env"
 
 export function Topbar({ onMenu }: { onMenu?: () => void }) {
   const { token, clear } = useAuth()
@@ -17,7 +18,7 @@ export function Topbar({ onMenu }: { onMenu?: () => void }) {
     try {
       if (token) {
         await axios.post(
-          `http://localhost:5000/api/auth/logout`,
+          apiUrl(`/auth/logout`),
           {}, // empty body
           {
             headers: {

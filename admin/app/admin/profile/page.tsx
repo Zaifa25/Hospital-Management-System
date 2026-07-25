@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
 import { toast } from "@/hooks/use-toast"
+import { apiUrl } from "@/lib/env"
 
 export default function AdminProfilePage() {
   const { user } = useAuth()
@@ -28,7 +29,7 @@ export default function AdminProfilePage() {
     try {
       const token = localStorage.getItem("hms_jwt")
       await axios.put(
-        "http://localhost:5000/api/auth/changePassword",
+        apiUrl(`/auth/changePassword`),
         {
           currentPassword: values.currentPassword,
           newPassword: values.newPassword,

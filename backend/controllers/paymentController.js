@@ -11,7 +11,9 @@ const createPayment = async (req, res) => {
 
 const getPayments = async (req, res) => {
   try {
-    const payments = await prisma.payment.findMany();
+    const payments = await prisma.payment.findMany({
+      include: { patient: true }
+    });
     res.json(payments);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -21,7 +23,13 @@ const getPayments = async (req, res) => {
 const getPaymentById = async (req, res) => {
   const { id } = req.params;
   try {
-    const payment = await prisma.payment.findUnique({ where: { id: parseInt(id) } });
+    const payment = await prisma.payment.findUnique({
+      where: { id: parseInt(id) },
+      include: { patient: true }
+    });
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment receipt not found' });
+    }
     res.json(payment);
   } catch (err) {
     res.status(500).json({ message: err.message });

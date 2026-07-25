@@ -37,9 +37,12 @@ const authMiddleware = async (req, res, next) => {
       user = await prisma.dSAProfile.findUnique({ where: { id: userId } });
     } else if (roleId === 4) {
       user = await prisma.receptionist.findUnique({ where: { id: userId } });
+    } else if (roleId === 5) {
+      user = await prisma.hRProfile.findUnique({ where: { id: userId } });
     } else {
       user = await prisma.admin.findUnique({ where: { id: userId } }) || 
-             await prisma.doctor.findUnique({ where: { id: userId } });
+             await prisma.doctor.findUnique({ where: { id: userId } }) ||
+             await prisma.hRProfile.findUnique({ where: { id: userId } });
     }
 
     if (!user) return res.status(401).json({ message: 'Unauthorized: User not found' });

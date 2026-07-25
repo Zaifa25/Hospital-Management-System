@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useForm } from "react-hook-form"
@@ -12,10 +13,12 @@ import { toast } from "@/hooks/use-toast"
 import { mutateWithAuth } from "@/lib/api-client"
 import axios from "axios"
 import { useAuth } from "@/hooks/use-auth"
+import { apiUrl } from "@/lib/env"
 import { useEffect, useMemo } from "react"
 import { usePatients } from "@/hooks/use-patients"
 import { useDepartments } from "@/hooks/use-departments"
 import { useDoctors } from "@/hooks/use-doctors"
+import { useEmployees } from "@/hooks/use-employees"
 import { useAppointmentNumbers } from "@/hooks/use-appointment-numbers"
 
 export function EntityForm({
@@ -56,76 +59,79 @@ export function EntityForm({
   async function onSubmit(values: any) {
     try {
       const isUpdate = Boolean(values.id)
-      // Use axios for departments, doctors, dsas, and patients entities
-      if (config.key === "departments" || config.key === "doctors" || config.key === "dsas" || config.key === "patients" || config.key==="procedures" || config.key==="payments" || config.key==="appointments" || config.key==="receptionists") {
-        const url = `http://localhost:5000/api${isUpdate ? `${config.endpoint}/${values.id}` : config.endpoint}`
-        const token = localStorage.getItem("hms_jwt")
+      const url = apiUrl(isUpdate ? `${config.endpoint}/${values.id}` : config.endpoint)
+      const token = localStorage.getItem("hms_jwt")
 
-        // Format the data specifically for doctors
-        let data = values
-        if (config.key === "doctors") {
-          data = {
-            ...values,
-            departmentId: values.departmentId ? Number(values.departmentId) : undefined, // Ensure it's a number
-            password: values.password || undefined // Only include if provided
-          }
+      // Format the data specifically for doctors, attendance, payroll, employees
+      let data = { ...values }
+      if (config.key === "doctors") {
+        data = {
+          ...values,
+          departmentId: values.departmentId ? Number(values.departmentId) : undefined,
+          password: values.password || undefined
         }
-        // For DSAs no special formatting required at this time
-
-        console.log('Sending data to server:', data) // Debug log
-
-        const hasFile = Object.values(data).some(v => v instanceof File || (typeof FileList !== "undefined" && v instanceof FileList && v.length > 0));
-
-        let requestData;
-        let contentType;
-
-        if (hasFile) {
-          const formData = new FormData();
-          Object.entries(data).forEach(([k, v]) => {
-            if (v !== undefined && v !== null && v !== "") {
-              if (typeof FileList !== "undefined" && v instanceof FileList && v.length > 0) {
-                formData.append(k, v[0]);
-              } else if (v instanceof File) {
-                formData.append(k, v);
-              } else {
-                formData.append(k, String(v));
-              }
-            }
-          });
-          requestData = formData;
-          contentType = "multipart/form-data";
-        } else {
-          requestData = data;
-          contentType = "application/json";
+      } else if (config.key === "payroll") {
+        data = {
+          ...values,
+          employeeId: Number(values.employeeId),
+          basicSalary: Number(values.basicSalary),
+          bonus: Number(values.bonus || 0),
+          deductions: Number(values.deductions || 0),
         }
-
-        const response = await axios({
-          url,
-          method: isUpdate ? "put" : "post",
-          data: requestData,
-          headers: {
-            "Content-Type": contentType,
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        })
-        
-        console.log('Server response:', response.data) // Debug log
-
-        // Refresh appointment numbers after successful creation
-        if (config.key === "appointments" && !isUpdate) {
-          refreshNumbers();
+      } else if (config.key === "attendance") {
+        data = {
+          ...values,
+          employeeId: Number(values.employeeId),
         }
-      } else {
-        await mutateWithAuth(isUpdate ? `${config.endpoint}/${values.id}` : config.endpoint, {
-          method: isUpdate ? "PUT" : "POST",
-          body: JSON.stringify(values),
-        })
       }
+
+      console.log('Sending data to server:', data) // Debug log
+
+      const hasFile = Object.values(data).some(v => v instanceof File || (typeof FileList !== "undefined" && v instanceof FileList && v.length > 0));
+
+      let requestData;
+      let contentType;
+
+      if (hasFile) {
+        const formData = new FormData();
+        Object.entries(data).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== "") {
+            if (typeof FileList !== "undefined" && v instanceof FileList && v.length > 0) {
+              formData.append(k, v[0]);
+            } else if (v instanceof File) {
+              formData.append(k, v);
+            } else {
+              formData.append(k, String(v));
+            }
+          }
+        });
+        requestData = formData;
+        contentType = "multipart/form-data";
+      } else {
+        requestData = data;
+        contentType = "application/json";
+      }
+
+      const response = await axios({
+        url,
+        method: isUpdate ? "put" : "post",
+        data: requestData,
+        headers: {
+          "Content-Type": contentType,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+      
+      console.log('Server response:', response.data) // Debug log
+
+      if (config.key === "appointments" && !isUpdate) {
+        refreshNumbers();
+      }
+      
       toast({ title: `${config.single} ${isUpdate ? "updated" : "created"}` })
       onSubmitted()
     } catch (error: any) {
       console.error('Submit error:', error)
-      // Show more detailed error message
       const errorMessage = error.response?.data?.message || error.message || "Save failed"
       toast({ 
         title: "Error saving",
@@ -135,14 +141,14 @@ export function EntityForm({
     }
   }
 
-  // Fetch departments, patients, and doctors for select options
+  // Fetch departments, patients, doctors, and employees for select options
   const { departments } = useDepartments()
   const { patients } = usePatients()
   const { doctors } = useDoctors()
+  const { employees } = useEmployees()
 
-  // Enhance field options for doctors, procedures, payments, and appointments
+  // Enhance field options for doctors, payments, appointments, attendance, and payroll
   const fields = useMemo(() => {
-    if (!["doctors", "procedures", "payments", "appointments"].includes(config.key)) return config.fields
     return config.fields.map((field) => {
       if (field.name === "departmentId") {
         return {
@@ -162,9 +168,16 @@ export function EntityForm({
           options: doctors,
         }
       }
+      if (field.name === "employeeId") {
+        return {
+          ...field,
+          type: "select" as const,
+          options: employees,
+        }
+      }
       return field
     })
-  }, [config.fields, config.key, departments, patients, doctors])
+  }, [config.fields, config.key, departments, patients, doctors, employees])
 
   // Auto-fill mrNo in payments form when patientId changes
   useEffect(() => {
@@ -222,6 +235,13 @@ export function EntityForm({
                     form.setValue(key, e.target.files[0], { shouldValidate: true })
                   }
                 }}
+              />
+            ) : f.inputType === "textarea" ? (
+              <Textarea 
+                id={f.name} 
+                placeholder={f.placeholder} 
+                rows={f.rows ?? 3}
+                {...form.register(key)} 
               />
             ) : (
               <Input 

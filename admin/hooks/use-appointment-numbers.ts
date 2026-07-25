@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { apiUrl } from "@/lib/env";
 
 export function useAppointmentNumbers() {
   const [nextNumbers, setNextNumbers] = useState<{ tokenNo: number; appointNo: number }>({ tokenNo: 1, appointNo: 1000 });
@@ -8,7 +9,7 @@ export function useAppointmentNumbers() {
   const fetchLastNumbers = useCallback(async () => {
     try {
       const token = localStorage.getItem("hms_jwt");
-      const response = await axios.get('http://localhost:5000/api/appointments', {
+      const response = await axios.get(apiUrl('/appointments'), {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },

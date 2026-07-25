@@ -14,16 +14,18 @@ import { toast } from "@/hooks/use-toast"
 import axios from "axios"
 
 function getApiBaseUrl() {
-  const envBase = process.env.NEXT_PUBLIC_API_BASE_URL
-  if (envBase) return envBase
+  // NEXT_PUBLIC_API_URL is defined as "http://localhost:5001/api" in .env.local
+  // Strip trailing /api so we can append our own path segments cleanly
+  const envBase = process.env.NEXT_PUBLIC_API_URL
+  if (envBase) return envBase.replace(/\/api\/?$/, "")
   if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:5000`
+    return `${window.location.protocol}//${window.location.hostname}:5001`
   }
-  return "http://localhost:5000"
+  return "http://localhost:5001"
 }
 
 const schema = z.object({
-  role: z.enum(["admin", "doctor", "receptionist", "dsa"]),
+  role: z.enum(["admin", "doctor", "receptionist", "hr"]),
   email: z.string().email(),
   password: z.string().min(6, "Password must be at least 6 characters"),
 })
@@ -48,11 +50,11 @@ export function SignInForm() {
       const res = await axios.post(`${getApiBaseUrl()}/api/auth/login`, values)
       
       const admin = res.data.admin
-      const roleMap: Record<number, "admin" | "doctor" | "dsa" | "receptionist"> = {
+      const roleMap: Record<number, "admin" | "doctor" | "receptionist" | "hr"> = {
         1: "admin",
         2: "doctor",
-        3: "dsa",
         4: "receptionist",
+        5: "hr",
       }
       const role = roleMap[admin?.roleId ?? 1] || "admin"
 
@@ -78,16 +80,16 @@ export function SignInForm() {
         <Label htmlFor="role">Sign in as</Label>
         <Select
           value={watch("role")}
-          onValueChange={(val: "admin" | "doctor" | "receptionist" | "dsa") => setValue("role", val, { shouldValidate: true })}
+          onValueChange={(val: "admin" | "doctor" | "receptionist" | "hr") => setValue("role", val, { shouldValidate: true })}
         >
           <SelectTrigger id="role">
             <SelectValue placeholder="Select Role" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="hr">HR Manager</SelectItem>
             <SelectItem value="doctor">Doctor</SelectItem>
             <SelectItem value="receptionist">Receptionist</SelectItem>
-            <SelectItem value="dsa">DSA</SelectItem>
           </SelectContent>
         </Select>
         {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}

@@ -38,13 +38,12 @@ export function RegisterForm() {
       const token = localStorage.getItem("hms_jwt")
       const headers = token ? { Authorization: `Bearer ${token}` } : {}
       
-      const res = await axios.post(`http://localhost:5000/api/auth/register`, values, { headers })
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api").replace(/\/api\/?$/, "")
+      const res = await axios.post(`${apiBase}/api/auth/register`, values, { headers })
       
       const admin = res.data.admin
-      const roleMap: Record<number, "admin" | "doctor" | "dsa"> = {
+      const roleMap: Record<number, "admin"> = {
         1: "admin",
-        2: "doctor",
-        3: "dsa",
       }
       const role = roleMap[admin?.roleId ?? 1] || "admin"
 
@@ -94,7 +93,6 @@ export function RegisterForm() {
           {...register("roleId")}
         >
           <option value={1}>Admin (Full Access)</option>
-          <option value={3}>DSA (Discharge & Support Assistant)</option>
         </select>
       </div>
       <Button className="w-full" type="submit" disabled={loading}>

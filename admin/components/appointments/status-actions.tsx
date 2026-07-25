@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
 import { CheckCircle, XCircle, CheckCheck, Clock } from "lucide-react"
 import axios from "axios"
+import { apiUrl } from "@/lib/env"
 
 export type AppointmentStatus = "scheduled" | "confirmed" | "completed" | "cancelled"
 
@@ -61,7 +62,7 @@ export function StatusActions({ appointment, onChanged }: StatusActionsProps) {
       const token = localStorage.getItem("hms_jwt")
       // Send minimal patch — only update status field
       await axios.put(
-        `http://localhost:5000/api/appointments/${appointment.id}`,
+        apiUrl(`/appointments/${appointment.id}`),
         {
           patientId: Number(appointment.patientId),
           doctorId: Number(appointment.doctorId),

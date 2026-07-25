@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import axios from "axios"
+import { apiUrl } from "@/lib/env"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ArrowLeft, Printer, CheckCircle, Clock, XCircle } from "lucide-react"
@@ -40,14 +41,14 @@ export default function PaymentReceiptPage() {
       try {
         const token = localStorage.getItem("hms_jwt")
         const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
-        const base = "http://localhost:5000/api"
-
-        const payRes = await axios.get(`${base}/payments/${id}`, { headers })
+        const payRes = await axios.get(apiUrl(`/payments/${id}`), { headers })
         const p = payRes.data
         setPayment(p)
 
-        if (p?.patientId) {
-          const patRes = await axios.get(`${base}/patients/${p.patientId}`, { headers })
+        if (p?.patient) {
+          setPatient(p.patient)
+        } else if (p?.patientId) {
+          const patRes = await axios.get(apiUrl(`/patients/${p.patientId}`), { headers })
           setPatient(patRes.data)
         }
       } catch (err) {

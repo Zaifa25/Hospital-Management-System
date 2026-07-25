@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { useAuth, isAdmin, isDoctor, isDSA } from "@/hooks/use-auth"
+import { useAuth, isAdmin, isDoctor } from "@/hooks/use-auth"
 import {
   LayoutDashboard,
   Stethoscope,
@@ -11,11 +11,13 @@ import {
   CalendarDays,
   CreditCard,
   Building2,
-  ClipboardList,
   UserCog,
   X,
   Activity,
   ShieldCheck,
+  Briefcase,
+  CalendarCheck,
+  DollarSign,
 } from "lucide-react"
 
 type NavLink = {
@@ -30,21 +32,22 @@ const links: NavLink[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/analytics", label: "Analytics", icon: Activity },
   { href: "/admin/doctors", label: "Doctors", icon: Stethoscope, allowRoles: [1] },
-  { href: "/admin/dsas", label: "DSAs", icon: Users, allowRoles: [1] },
   { href: "/admin/receptionists", label: "Receptionists", icon: Users, allowRoles: [1] },
-  { href: "/admin/patients", label: "Patients", icon: Users },
-  { href: "/admin/appointments", label: "Appointments", icon: CalendarDays },
+  { href: "/admin/employees", label: "Employees (HR)", icon: Briefcase, allowRoles: [1, 5] },
+  { href: "/admin/attendance", label: "Attendance", icon: CalendarCheck, allowRoles: [1, 5] },
+  { href: "/admin/payroll", label: "Payroll & Salaries", icon: DollarSign, allowRoles: [1, 5] },
+  { href: "/admin/patients", label: "Patients", icon: Users, allowRoles: [1, 2, 4] },
+  { href: "/admin/appointments", label: "Appointments", icon: CalendarDays, allowRoles: [1, 2, 4] },
   { href: "/admin/payments", label: "Payments", icon: CreditCard, allowRoles: [1, 3] },
   { href: "/admin/departments", label: "Departments", icon: Building2, allowRoles: [1] },
-  { href: "/admin/procedures", label: "Procedures", icon: ClipboardList, allowRoles: [1] },
-  { href: "/admin/profile", label: "Admin Profile", icon: UserCog },
+  { href: "/admin/profile", label: "Profile", icon: UserCog },
 ]
 
 const roleBadge: Record<number, { label: string; color: string }> = {
   1: { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" },
   2: { label: "Doctor", color: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
-  3: { label: "DSA", color: "bg-amber-500/10 text-amber-600 border-amber-200" },
   4: { label: "Receptionist", color: "bg-blue-500/10 text-blue-600 border-blue-200" },
+  5: { label: "HR Manager", color: "bg-purple-500/10 text-purple-600 border-purple-200" },
 }
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {

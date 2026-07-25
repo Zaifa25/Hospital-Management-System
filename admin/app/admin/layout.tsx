@@ -4,13 +4,13 @@ import type React from "react"
 
 import { Sidebar } from "@/components/admin/sidebar"
 import { Topbar } from "@/components/admin/topbar"
-import { useAuth, isAdmin, isDoctor, isDSA } from "@/hooks/use-auth"
+import { useAuth, isAdmin, isDoctor } from "@/hooks/use-auth"
 import { useRouter, usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
 // Routes only accessible by admins (roleId === 1)
-const ADMIN_ONLY_ROUTES = ["/admin/doctors", "/admin/dsas", "/admin/departments", "/admin/procedures"]
-// Routes accessible by admin + DSA only (not doctors)
+const ADMIN_ONLY_ROUTES = ["/admin/doctors", "/admin/departments"]
+// Routes accessible by admin only (not doctors)
 const NO_DOCTOR_ROUTES = ["/admin/payments"]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
