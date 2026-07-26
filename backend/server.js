@@ -47,6 +47,16 @@ app.use(express.json());
 // Serve uploads folder statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// System Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    system: 'City Care Hospital Management System API',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
