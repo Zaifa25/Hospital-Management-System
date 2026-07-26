@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { StatusActions } from "@/components/appointments/status-actions"
 
+/**
+ * Configuration schema for individual form input fields in the HMS CRUD engine.
+ */
 export type FieldConfig = {
   name: string
   label: string
@@ -17,6 +20,9 @@ export type FieldConfig = {
   rows?: number  // for textarea fields
 }
 
+/**
+ * Master configuration object defining an entity's API endpoints, form fields, schema, and table columns.
+ */
 export type EntityConfig = {
   key: string
   title: string
