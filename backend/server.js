@@ -67,7 +67,8 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/receptionists', receptionistRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
-app.use('/api/payrolls', payrollRoutes);
+const errorHandler = require('./middlewares/errorMiddleware');
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
