@@ -1,5 +1,9 @@
 const prisma = require('../config/db');
 
+/**
+ * Fetch all staff payroll records ordered by creation date.
+ * @route GET /api/payrolls
+ */
 const getPayrolls = async (req, res) => {
   try {
     const payrolls = await prisma.payroll.findMany({
@@ -12,6 +16,10 @@ const getPayrolls = async (req, res) => {
   }
 };
 
+/**
+ * Get payroll details for a specific record by ID.
+ * @route GET /api/payrolls/:id
+ */
 const getPayrollById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -28,6 +36,10 @@ const getPayrollById = async (req, res) => {
   }
 };
 
+/**
+ * Create or record a new staff payroll salary entry.
+ * @route POST /api/payrolls
+ */
 const createPayroll = async (req, res) => {
   try {
     const data = { ...req.body };
