@@ -3,11 +3,11 @@
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 
-export type UserRole = "admin" | "doctor" | "dsa" | "user"
+export type UserRole = "admin" | "doctor" | "dsa" | "receptionist" | "hr" | "user"
 
 export type User = {
   role: UserRole
-  roleId?: number   // 1=Admin, 2=Doctor, 3=DSA
+  roleId?: number   // 1=Admin, 2=Doctor, 3=DSA, 4=Receptionist, 5=HR
   email: string
   name?: string
 }
@@ -28,6 +28,18 @@ export function isDoctor(user: User | null): boolean {
 export function isDSA(user: User | null): boolean {
   if (!user) return false
   return user.roleId === 3 || user.role === "dsa"
+}
+
+/** Returns true if the user is a Receptionist */
+export function isReceptionist(user: User | null): boolean {
+  if (!user) return false
+  return user.roleId === 4 || user.role === "receptionist"
+}
+
+/** Returns true if the user is an HR Manager */
+export function isHR(user: User | null): boolean {
+  if (!user) return false
+  return user.roleId === 5 || user.role === "hr"
 }
 
 const TOKEN_KEY = "hms_jwt"
