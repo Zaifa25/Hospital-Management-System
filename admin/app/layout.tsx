@@ -8,8 +8,8 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "HMS Admin",
-  description: "Created with v0",
+  title: "City Care Hospital Management System | HMS Portal",
+  description: "Enterprise-grade Hospital Management System for Clinical Operations, HR, Payroll, Appointments & Patient Management.",
   generator: "Next.js",
 }
 
