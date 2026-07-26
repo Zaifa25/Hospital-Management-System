@@ -2,7 +2,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/db');
 
-// Register Admin/Staff (initial setup, or admin creating staff)
+/**
+ * Register a new Admin or Staff user account.
+ * Requires administrator credentials if an initial admin already exists.
+ * @route POST /api/auth/register
+ */
 const registerAdmin = async (req, res) => {
   const { email, password, name, roleId } = req.body;
 
@@ -43,7 +47,11 @@ const registerAdmin = async (req, res) => {
   }
 };
 
-// Login checking both Admin and Doctor tables
+/**
+ * Authenticate Admin, HR, Doctor, Receptionist, or DSA user accounts.
+ * Returns JWT bearer token upon successful verification.
+ * @route POST /api/auth/login
+ */
 const adminLogin = async (req, res) => {
   const { email, password, role } = req.body;
 
