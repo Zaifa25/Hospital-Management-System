@@ -1,5 +1,9 @@
 const prisma = require('../config/db');
 
+/**
+ * Fetch all registered hospital employees with department information.
+ * @route GET /api/employees
+ */
 const getEmployees = async (req, res) => {
   try {
     const employees = await prisma.employee.findMany({
@@ -11,6 +15,10 @@ const getEmployees = async (req, res) => {
   }
 };
 
+/**
+ * Get employee details by ID including attendances and payroll records.
+ * @route GET /api/employees/:id
+ */
 const getEmployeeById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -27,6 +35,10 @@ const getEmployeeById = async (req, res) => {
   }
 };
 
+/**
+ * Create a new employee record.
+ * @route POST /api/employees
+ */
 const createEmployee = async (req, res) => {
   try {
     const data = { ...req.body };
@@ -41,6 +53,10 @@ const createEmployee = async (req, res) => {
   }
 };
 
+/**
+ * Update an existing employee profile.
+ * @route PUT /api/employees/:id
+ */
 const updateEmployee = async (req, res) => {
   const { id } = req.params;
   try {
@@ -59,6 +75,10 @@ const updateEmployee = async (req, res) => {
   }
 };
 
+/**
+ * Delete an employee record by ID.
+ * @route DELETE /api/employees/:id
+ */
 const deleteEmployee = async (req, res) => {
   const { id } = req.params;
   try {
