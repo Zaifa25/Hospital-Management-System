@@ -35,3 +35,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 lerna-debug.log*
+
+# User uploads & media
+backend/uploads/*
+!backend/uploads/.gitkeep
+
