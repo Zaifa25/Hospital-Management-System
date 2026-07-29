@@ -46,6 +46,33 @@ This repository is structured as a monorepo consisting of:
 
 ---
 
+## 🚀 Quick Start & Setup Guide
+
+### Prerequisites
+* **Node.js**: v18.0.0 or higher
+* **PostgreSQL**: Local instance or cloud database (e.g. Neon, Supabase)
+* **npm** or **yarn** package manager
+
+### 1. Backend Setup (`/backend`)
+```bash
+cd backend
+npm install
+npx prisma generate
+npx prisma db push
+npm run dev
+```
+
+### 2. Admin Dashboard Setup (`/admin`)
+```bash
+cd admin
+npm install
+npm run dev
+```
+
+The admin portal will be running at `http://localhost:3000` and the API server at `http://localhost:5001`.
+
+---
+
 ## 🛠️ Technology Stack
 
 ### Frontend (`/admin`)
