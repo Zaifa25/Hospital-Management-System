@@ -1,5 +1,9 @@
 const prisma = require('../config/db');
 
+/**
+ * Record a new patient transaction or billing payment entry.
+ * @route POST /api/payments
+ */
 const createPayment = async (req, res) => {
   try {
     const payment = await prisma.payment.create({ data: req.body });
@@ -9,6 +13,10 @@ const createPayment = async (req, res) => {
   }
 };
 
+/**
+ * Retrieve all billing payments with associated patient details.
+ * @route GET /api/payments
+ */
 const getPayments = async (req, res) => {
   try {
     const payments = await prisma.payment.findMany({
@@ -20,6 +28,10 @@ const getPayments = async (req, res) => {
   }
 };
 
+/**
+ * Get payment receipt record details by ID.
+ * @route GET /api/payments/:id
+ */
 const getPaymentById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -36,6 +48,10 @@ const getPaymentById = async (req, res) => {
   }
 };
 
+/**
+ * Update an existing payment transaction record.
+ * @route PUT /api/payments/:id
+ */
 const updatePayment = async (req, res) => {
   const { id } = req.params;
   try {
@@ -49,6 +65,10 @@ const updatePayment = async (req, res) => {
   }
 };
 
+/**
+ * Delete a payment record from system.
+ * @route DELETE /api/payments/:id
+ */
 const deletePayment = async (req, res) => {
   const { id } = req.params;
   try {
