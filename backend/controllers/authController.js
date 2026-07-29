@@ -86,30 +86,36 @@ const adminLogin = async (req, res) => {
   res.json({ token, admin: user });
 };
 
+/**
+ * Invalidate user session client-side.
+ * @route POST /api/auth/logout
+ */
 const logout = async (req, res) => {
   try {
-    // You can still check if the token exists (optional)
+    // Check if the token header exists
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(400).json({ message: "No token provided" })
     }
 
-    // Nothing else needed — just respond success
+    // Respond with logout confirmation
     return res.json({ message: "Logout successful" })
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
 }
 
+/**
+ * Change authenticated user's account password.
+ * @route POST /api/auth/change-password
+ */
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    console.log(req.body);
     
-    const adminId = req.user.id; // This comes from auth middleware
-    console.log("adminid",adminId);
+    const adminId = req.user.id; // Extracted from decoded JWT token in auth middleware
 
-    // Get admin from database
+    // Get admin user from database
     const admin = await prisma.admin.findUnique({
       where: { id: adminId }
     });
@@ -118,16 +124,16 @@ const changePassword = async (req, res) => {
       return res.status(404).json({ message: 'Admin not found' });
     }
 
-    // Verify current password
+    // Verify current password match
     const isMatch = await bcrypt.compare(currentPassword, admin.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
 
-    // Hash new password
+    // Hash new password using bcrypt
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password in database
+    // Update password record in database
     await prisma.admin.update({
       where: { id: adminId },
       data: { password: hashedPassword }
