@@ -1,7 +1,16 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/db');
 
+/**
+ * Express middleware to authenticate JWT access tokens in incoming request authorization headers.
+ * Extracts Bearer token, verifies JWT signature, fetches user entity based on role ID, and attaches `req.user`.
+ *
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {import('express').NextFunction} next - Express next middleware function
+ */
 const authMiddleware = async (req, res, next) => {
+
   try {
     const authHeader = req.headers['authorization'] || req.headers['Authorization'];
  
