@@ -835,7 +835,7 @@ export const entityConfigs: Record<string, EntityConfig> = {
     single: "Payroll Record",
     description: "Manage monthly staff salaries, bonuses, deductions, and payouts.",
     endpoint: "/payrolls",
-    defaults: { employeeId: "", month: "July 2026", basicSalary: 50000, bonus: 0, deductions: 0, status: "Pending" },
+    defaults: { employeeId: "", month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }), basicSalary: 50000, bonus: 0, deductions: 0, status: "Pending" },
     schema: z.object({
       id: z.any().optional(),
       employeeId: z.coerce.number().min(1, "Employee is required"),
@@ -847,7 +847,7 @@ export const entityConfigs: Record<string, EntityConfig> = {
     }),
     fields: [
       { name: "employeeId", label: "Select Employee", type: "select" },
-      { name: "month", label: "Salary Month", placeholder: "July 2026" },
+      { name: "month", label: "Salary Month", placeholder: "e.g., July 2026" },
       { name: "basicSalary", label: "Basic Salary (PKR)", type: "number", inputType: "number", coerce: (v) => Number(v) },
       { name: "bonus", label: "Bonus (PKR)", type: "number", inputType: "number", coerce: (v) => Number(v) },
       { name: "deductions", label: "Deductions (PKR)", type: "number", inputType: "number", coerce: (v) => Number(v) },
@@ -863,6 +863,7 @@ export const entityConfigs: Record<string, EntityConfig> = {
     ],
     columns: ({ onEdit, onDelete, onViewSlip, onMarkPaid }: any) => [
       { header: "Employee", accessorKey: "employee", cell: ({ row }) => row.original.employee?.name || `Employee #${row.original.employeeId}` },
+      { header: "Department", accessorKey: "department", cell: ({ row }) => row.original.employee?.department?.name || "General" },
       { header: "Month", accessorKey: "month" },
       { header: "Basic Salary", accessorKey: "basicSalary", cell: ({ getValue }) => `₨ ${(Number(getValue()) || 0).toLocaleString()}` },
       { header: "Bonus", accessorKey: "bonus", cell: ({ getValue }) => `₨ ${(Number(getValue()) || 0).toLocaleString()}` },
@@ -870,7 +871,20 @@ export const entityConfigs: Record<string, EntityConfig> = {
       {
         header: "Net Salary",
         accessorKey: "netSalary",
-        cell: ({ getValue }) => <span className="font-bold text-emerald-600">₨ ${(Number(getValue()) || 0).toLocaleString()}</span>,
+        cell: ({ getValue, row }) => (
+          <span className={`font-bold ${row.original.status === 'Paid' ? 'text-emerald-700' : 'text-amber-700'}`}>
+            ₨ ${(Number(getValue()) || 0).toLocaleString()}
+          </span>
+        ),
+      },
+      {
+        header: "Payment Date",
+        accessorKey: "paymentDate",
+        cell: ({ getValue }) => {
+          const v = getValue() as string
+          if (!v) return <span className="text-muted-foreground">—</span>
+          return <span className="text-xs font-medium">{new Date(v).toLocaleDateString("en-PK")}</span>
+        }
       },
       {
         header: "Status",
@@ -878,7 +892,7 @@ export const entityConfigs: Record<string, EntityConfig> = {
         cell: ({ getValue }) => {
           const v = String(getValue())
           return (
-            <Badge variant={v === "Paid" ? "default" : "secondary"}>
+            <Badge variant={v === "Paid" ? "default" : "secondary"} className={v === "Paid" ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm" : "bg-amber-100 text-amber-800 hover:bg-amber-200"}>
               {v}
             </Badge>
           )
@@ -889,20 +903,25 @@ export const entityConfigs: Record<string, EntityConfig> = {
         header: "Actions",
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1.5 items-center">
-            {row.original.status !== "Paid" && onMarkPaid && (
-              <Button size="sm" variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 text-xs px-2" onClick={() => onMarkPaid(row.original)}>
-                Mark Paid
+            {onMarkPaid && (
+              <Button 
+                size="sm" 
+                variant="default" 
+                className={`h-7 text-xs px-2.5 shadow-sm transition-colors ${row.original.status === "Paid" ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white"}`} 
+                onClick={() => onMarkPaid(row.original)}
+              >
+                {row.original.status === "Paid" ? "Undo" : "Mark Paid"}
               </Button>
             )}
             {onViewSlip && (
-              <Button size="sm" variant="outline" className="h-7 text-xs px-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50" onClick={() => onViewSlip(row.original)}>
+              <Button size="sm" variant="outline" className="h-7 text-xs px-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50 shadow-sm" onClick={() => onViewSlip(row.original)}>
                 Payslip
               </Button>
             )}
-            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => onEdit(row.original)}>
+            <Button size="sm" variant="outline" className="h-7 text-xs px-2 shadow-sm" onClick={() => onEdit(row.original)}>
               Edit
             </Button>
-            <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => onDelete(row.original)}>
+            <Button size="sm" variant="destructive" className="h-7 text-xs px-2 shadow-sm" onClick={() => onDelete(row.original)}>
               Delete
             </Button>
           </div>

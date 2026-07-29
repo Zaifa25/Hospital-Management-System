@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
 import { DollarSign, CheckCircle2, Clock, Sparkles, UserCheck } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type Employee = {
   id: number
@@ -31,11 +32,20 @@ type PayrollRow = {
   status: "Pending" | "Paid"
 }
 
-const monthsList = [
-  "January 2026", "February 2026", "March 2026", "April 2026",
-  "May 2026", "June 2026", "July 2026", "August 2026",
-  "September 2026", "October 2026", "November 2026", "December 2026"
-]
+// Generate last 12 months + next 12 months
+const generateMonths = () => {
+  const months = []
+  const today = new Date()
+  const currentMonth = today.getMonth()
+  const currentYear = today.getFullYear()
+  
+  for (let i = -12; i <= 12; i++) {
+    const d = new Date(currentYear, currentMonth + i, 1)
+    months.push(d.toLocaleString('default', { month: 'long', year: 'numeric' }))
+  }
+  return months
+}
+const monthsList = generateMonths()
 
 export function MonthlyPayrollSheet({
   open,
@@ -46,7 +56,8 @@ export function MonthlyPayrollSheet({
   onOpenChange: (open: boolean) => void
   onSubmitted: () => void
 }) {
-  const [selectedMonth, setSelectedMonth] = useState<string>("July 2026")
+  const currentMonthStr = new Date().toLocaleString('default', { month: 'long', year: 'numeric' })
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthStr)
   const [rows, setRows] = useState<PayrollRow[]>([])
   const [loadingEmployees, setLoadingEmployees] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -62,7 +73,7 @@ export function MonthlyPayrollSheet({
 
         const [empRes, payRes] = await Promise.all([
           axios.get(apiUrl("/employees"), { headers }),
-          axios.get(apiUrl("/payrolls"), { headers }),
+          axios.get(apiUrl(`/payrolls?month=${selectedMonth}`), { headers }), // We could filter on backend, but let's fetch all or filter client side
         ])
 
         const employeesList: Employee[] = Array.isArray(empRes.data) ? empRes.data : empRes.data.data || []
@@ -75,7 +86,7 @@ export function MonthlyPayrollSheet({
         )
 
         setRows(
-          employeesList.map((emp) => {
+          employeesList.filter(emp => emp.status !== 'resigned').map((emp) => {
             const existing = monthPayMap.get(emp.id)
             return {
               employeeId: emp.id,
@@ -108,6 +119,17 @@ export function MonthlyPayrollSheet({
     })
   }
 
+  const handleValueChange = (index: number, field: "bonus" | "deductions", value: string) => {
+    const num = value === "" ? 0 : Number(value)
+    if (isNaN(num)) return
+    
+    setRows((prev) => {
+      const next = [...prev]
+      next[index] = { ...next[index], [field]: num }
+      return next
+    })
+  }
+
   const handleMarkAll = (status: "Pending" | "Paid") => {
     setRows((prev) => prev.map((r) => ({ ...r, status })))
   }
@@ -120,7 +142,7 @@ export function MonthlyPayrollSheet({
       const token = localStorage.getItem("hms_jwt")
       const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
 
-      // Save entries for each employee
+      // Save entries for each employee sequentially (or use Promise.all in production for speed)
       for (const r of rows) {
         await axios.post(
           apiUrl("/payrolls"),
@@ -159,14 +181,14 @@ export function MonthlyPayrollSheet({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <DollarSign className="h-6 w-6 text-emerald-600" />
             Monthly Staff Payroll Sheet
           </DialogTitle>
           <DialogDescription>
-            Select a month, review employee salaries, and toggle payment status for all staff.
+            Select a month, adjust employee bonuses/deductions, and toggle payment status for all staff.
           </DialogDescription>
         </DialogHeader>
 
@@ -178,10 +200,10 @@ export function MonthlyPayrollSheet({
                 Payroll Month:
               </Label>
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger id="month-select" className="w-48 h-9 bg-background">
+                <SelectTrigger id="month-select" className="w-56 h-9 bg-background">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-64">
                   {monthsList.map((m) => (
                     <SelectItem key={m} value={m}>
                       {m}
@@ -197,7 +219,7 @@ export function MonthlyPayrollSheet({
                 variant="outline"
                 size="sm"
                 onClick={() => handleMarkAll("Paid")}
-                className="text-xs gap-1 text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                className="text-xs gap-1 text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100 shadow-sm"
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Mark All Paid ({rows.length})
@@ -207,7 +229,7 @@ export function MonthlyPayrollSheet({
                 variant="outline"
                 size="sm"
                 onClick={() => handleMarkAll("Pending")}
-                className="text-xs gap-1 text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100"
+                className="text-xs gap-1 text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100 shadow-sm"
               >
                 <Clock className="h-3.5 w-3.5" />
                 Set All Pending
@@ -217,47 +239,84 @@ export function MonthlyPayrollSheet({
 
           {/* Employee Sheet Table */}
           {loadingEmployees ? (
-            <div className="py-12 text-center text-muted-foreground space-y-2">
-              <Clock className="h-8 w-8 animate-spin mx-auto opacity-50" />
-              <p>Loading payroll sheet for {selectedMonth}...</p>
+            <div className="py-12 space-y-4">
+              <Skeleton className="h-12 w-full rounded-md" />
+              <Skeleton className="h-12 w-full rounded-md" />
+              <Skeleton className="h-12 w-full rounded-md" />
+              <Skeleton className="h-12 w-full rounded-md" />
             </div>
           ) : (
-            <div className="border rounded-xl overflow-hidden divide-y text-sm">
-              <div className="bg-muted/50 px-4 py-2.5 font-semibold text-xs text-muted-foreground grid grid-cols-12 gap-2">
-                <div className="col-span-4">EMPLOYEE NAME & ROLE</div>
-                <div className="col-span-4">BASIC & NET SALARY</div>
-                <div className="col-span-4 text-right">PAYOUT STATUS</div>
+            <div className="border rounded-xl overflow-hidden divide-y text-sm bg-background shadow-sm">
+              <div className="bg-muted/60 px-4 py-3 font-semibold text-xs text-muted-foreground grid grid-cols-12 gap-3 uppercase tracking-wider">
+                <div className="col-span-3">EMPLOYEE</div>
+                <div className="col-span-2 text-right">BASIC</div>
+                <div className="col-span-2">BONUS</div>
+                <div className="col-span-2">DEDUCTIONS</div>
+                <div className="col-span-1 text-right">NET</div>
+                <div className="col-span-2 text-right">STATUS</div>
               </div>
 
               {rows.map((row, idx) => {
                 const net = row.basicSalary + row.bonus - row.deductions
                 const isPaid = row.status === "Paid"
                 return (
-                  <div key={row.employeeId} className="p-3.5 grid grid-cols-12 gap-3 items-center hover:bg-muted/20 transition-colors">
+                  <div key={row.employeeId} className="p-3.5 grid grid-cols-12 gap-3 items-center hover:bg-muted/30 transition-colors">
                     {/* Employee Details */}
-                    <div className="col-span-4 min-w-0">
-                      <p className="font-medium text-foreground truncate">{row.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {row.designation} &bull; <span className="font-semibold text-primary">{row.departmentName}</span>
+                    <div className="col-span-3 min-w-0">
+                      <p className="font-semibold text-foreground truncate">{row.name}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {row.designation} &bull; <span className="font-medium text-primary/80">{row.departmentName}</span>
                       </p>
                     </div>
 
-                    {/* Salary Calculation */}
-                    <div className="col-span-4 flex items-center gap-3">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Basic: ₨ {row.basicSalary.toLocaleString()}</p>
-                        <p className="font-bold text-emerald-600 text-sm">Net: ₨ {net.toLocaleString()}</p>
+                    {/* Basic Salary */}
+                    <div className="col-span-2 text-right text-muted-foreground font-medium flex items-center justify-end">
+                      ₨ {row.basicSalary.toLocaleString()}
+                    </div>
+
+                    {/* Bonus Input */}
+                    <div className="col-span-2">
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">₨</span>
+                        <Input 
+                          type="number" 
+                          min="0"
+                          value={row.bonus || ""}
+                          onChange={(e) => handleValueChange(idx, "bonus", e.target.value)}
+                          className="h-8 pl-6 text-xs text-emerald-600 font-medium bg-background"
+                          placeholder="0"
+                        />
                       </div>
                     </div>
 
+                    {/* Deductions Input */}
+                    <div className="col-span-2">
+                       <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">₨</span>
+                        <Input 
+                          type="number" 
+                          min="0"
+                          value={row.deductions || ""}
+                          onChange={(e) => handleValueChange(idx, "deductions", e.target.value)}
+                          className="h-8 pl-6 text-xs text-red-600 font-medium bg-background"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Net Salary Calculation */}
+                    <div className="col-span-1 flex items-center justify-end">
+                      <p className="font-bold text-foreground text-sm">₨ {net.toLocaleString()}</p>
+                    </div>
+
                     {/* Status Button */}
-                    <div className="col-span-4 flex justify-end">
+                    <div className="col-span-2 flex justify-end">
                       <button
                         type="button"
                         onClick={() => handleStatusToggle(idx)}
-                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm ${
                           isPaid
-                            ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                            ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200"
                             : "bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200"
                         }`}
                       >
@@ -268,27 +327,34 @@ export function MonthlyPayrollSheet({
                   </div>
                 )
               })}
+              
+              {rows.length === 0 && !loadingEmployees && (
+                <div className="p-8 text-center text-muted-foreground">
+                  No active employees found for this month.
+                </div>
+              )}
             </div>
           )}
 
           {/* Sheet Footer */}
-          <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex items-center justify-between pt-5 border-t">
             <div>
-              <p className="text-xs text-muted-foreground">
-                Total Employees: <strong className="text-foreground">{rows.length}</strong> &bull; Paid:{" "}
-                <strong className="text-emerald-600">{paidCount}</strong>
-              </p>
-              <p className="text-sm font-bold text-emerald-700">
-                Total Budget: ₨ {totalExpense.toLocaleString()}
+              <div className="flex items-center gap-4 text-sm mb-1">
+                <span className="text-muted-foreground">Total Staff: <strong className="text-foreground">{rows.length}</strong></span>
+                <span className="text-muted-foreground">Paid: <strong className="text-emerald-600">{paidCount}</strong></span>
+                <span className="text-muted-foreground">Pending: <strong className="text-amber-600">{rows.length - paidCount}</strong></span>
+              </div>
+              <p className="text-lg font-bold text-foreground mt-1">
+                Net Payout Budget: <span className="text-emerald-600 tracking-tight">₨ {totalExpense.toLocaleString()}</span>
               </p>
             </div>
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="button" onClick={handleSubmit} disabled={submitting || rows.length === 0} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button type="button" onClick={handleSubmit} disabled={submitting || rows.length === 0} className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md">
                 <Sparkles className="h-4 w-4" />
-                {submitting ? "Saving Sheet..." : `Save Monthly Payroll (${rows.length})`}
+                {submitting ? "Saving Sheet..." : `Save Payroll Sheet (${rows.length})`}
               </Button>
             </div>
           </div>
