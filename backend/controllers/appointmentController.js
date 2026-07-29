@@ -1,10 +1,14 @@
 const prisma = require('../config/db');
 
+/**
+ * Schedule a new patient appointment after checking doctor availability.
+ * @route POST /api/appointments
+ */
 const createAppointment = async (req, res) => {
   try {
     const { doctorId, date, time } = req.body;
     
-    // Check for existing slot
+    // Check for existing slot collision
     if (doctorId && date && time) {
       const existing = await prisma.appointment.findFirst({
         where: {
@@ -26,6 +30,10 @@ const createAppointment = async (req, res) => {
   }
 };
 
+/**
+ * Fetch all appointments with patient, doctor, and department details.
+ * @route GET /api/appointments
+ */
 const getAppointments = async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
@@ -41,6 +49,10 @@ const getAppointments = async (req, res) => {
   }
 };
 
+/**
+ * Get appointment details by ID.
+ * @route GET /api/appointments/:id
+ */
 const getAppointmentById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -58,12 +70,16 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
+/**
+ * Update appointment details and verify slot conflict prevention.
+ * @route PUT /api/appointments/:id
+ */
 const updateAppointment = async (req, res) => {
   const { id } = req.params;
   try {
     const { doctorId, date, time } = req.body;
     
-    // Check for existing slot if these fields are being updated
+    // Check for existing slot collision if schedule fields are updated
     if (doctorId && date && time) {
       const existing = await prisma.appointment.findFirst({
         where: {
@@ -89,6 +105,10 @@ const updateAppointment = async (req, res) => {
   }
 };
 
+/**
+ * Cancel or delete an appointment record.
+ * @route DELETE /api/appointments/:id
+ */
 const deleteAppointment = async (req, res) => {
   const { id } = req.params;
   try {
