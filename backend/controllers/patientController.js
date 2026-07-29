@@ -1,5 +1,9 @@
 const prisma = require('../config/db');
 
+/**
+ * Register a new patient record in the hospital system.
+ * @route POST /api/patients
+ */
 const createPatient = async (req, res) => {
   try {
     const patient = await prisma.patient.create({ data: req.body });
@@ -9,6 +13,10 @@ const createPatient = async (req, res) => {
   }
 };
 
+/**
+ * Fetch all registered patient profiles.
+ * @route GET /api/patients
+ */
 const getPatients = async (req, res) => {
   try {
     const patients = await prisma.patient.findMany();
@@ -18,6 +26,10 @@ const getPatients = async (req, res) => {
   }
 };
 
+/**
+ * Get patient profile details by ID.
+ * @route GET /api/patients/:id
+ */
 const getPatientById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -28,6 +40,10 @@ const getPatientById = async (req, res) => {
   }
 };
 
+/**
+ * Update an existing patient record.
+ * @route PUT /api/patients/:id
+ */
 const updatePatient = async (req, res) => {
   const { id } = req.params;
   try {
@@ -41,6 +57,10 @@ const updatePatient = async (req, res) => {
   }
 };
 
+/**
+ * Delete a patient profile from database.
+ * @route DELETE /api/patients/:id
+ */
 const deletePatient = async (req, res) => {
   const { id } = req.params;
   try {
