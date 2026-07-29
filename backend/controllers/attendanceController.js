@@ -1,5 +1,9 @@
 const prisma = require('../config/db');
 
+/**
+ * Fetch all employee attendance records ordered by date descending.
+ * @route GET /api/attendance
+ */
 const getAttendances = async (req, res) => {
   try {
     const attendances = await prisma.attendance.findMany({
@@ -12,6 +16,10 @@ const getAttendances = async (req, res) => {
   }
 };
 
+/**
+ * Get attendance details by record ID.
+ * @route GET /api/attendance/:id
+ */
 const getAttendanceById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -28,6 +36,10 @@ const getAttendanceById = async (req, res) => {
   }
 };
 
+/**
+ * Record a single employee attendance entry.
+ * @route POST /api/attendance
+ */
 const createAttendance = async (req, res) => {
   try {
     const data = { ...req.body };
@@ -44,6 +56,10 @@ const createAttendance = async (req, res) => {
   }
 };
 
+/**
+ * Update an existing attendance record.
+ * @route PUT /api/attendance/:id
+ */
 const updateAttendance = async (req, res) => {
   const { id } = req.params;
   try {
@@ -62,6 +78,10 @@ const updateAttendance = async (req, res) => {
   }
 };
 
+/**
+ * Delete an attendance record.
+ * @route DELETE /api/attendance/:id
+ */
 const deleteAttendance = async (req, res) => {
   const { id } = req.params;
   try {
@@ -72,6 +92,10 @@ const deleteAttendance = async (req, res) => {
   }
 };
 
+/**
+ * Mark daily attendance in bulk for multiple staff members.
+ * @route POST /api/attendance/bulk
+ */
 const markBulkAttendance = async (req, res) => {
   try {
     const { date, records } = req.body; // records: Array of { employeeId, status, checkIn, checkOut, notes }
