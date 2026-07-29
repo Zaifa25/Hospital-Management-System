@@ -1,6 +1,13 @@
+/**
+ * @file server.js
+ * @description Main entry point for the City Care Hospital Management System (HMS) Express API server.
+ * Initializes middleware (CORS, JSON parsing, static uploads), defines API routes, and handles global error catching.
+ */
+
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+
 
 const authRoutes = require('./routes/authRoutes');
 const patientRoutes = require('./routes/patientRoutes');
