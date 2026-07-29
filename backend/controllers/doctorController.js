@@ -1,6 +1,10 @@
 const prisma = require('../config/db');
 const bcrypt = require('bcryptjs');
 
+/**
+ * Register a new doctor account with department assignment and hashed credentials.
+ * @route POST /api/doctors
+ */
 const createDoctor = async (req, res) => {
   try {
     const { name, email, departmentId, status, password, phone, qualification, experience, address, description } = req.body;
@@ -34,6 +38,10 @@ const createDoctor = async (req, res) => {
   }
 };
 
+/**
+ * Retrieve all registered doctors.
+ * @route GET /api/doctors
+ */
 const getDoctors = async (req, res) => {
   try {
     const doctors = await prisma.doctor.findMany();
@@ -43,6 +51,10 @@ const getDoctors = async (req, res) => {
   }
 };
 
+/**
+ * Retrieve a specific doctor profile by ID.
+ * @route GET /api/doctors/:id
+ */
 const getDoctorById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -53,11 +65,15 @@ const getDoctorById = async (req, res) => {
   }
 };
 
+/**
+ * Update doctor details, password, or profile picture.
+ * @route PUT /api/doctors/:id
+ */
 const updateDoctor = async (req, res) => {
   const { id } = req.params;
   try {
     const data = { ...req.body };
-    if(data.password){
+    if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);
     }
     if (data.departmentId) {
@@ -76,6 +92,10 @@ const updateDoctor = async (req, res) => {
   }
 };
 
+/**
+ * Delete a doctor profile and clear related appointments.
+ * @route DELETE /api/doctors/:id
+ */
 const deleteDoctor = async (req, res) => {
   const { id } = req.params;
   const doctorId = parseInt(id);
