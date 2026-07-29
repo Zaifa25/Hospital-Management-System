@@ -1,6 +1,13 @@
 const prisma = require('../config/db');
 
+/**
+ * Creates a new hospital department record.
+ * @route POST /api/departments
+ * @param {import('express').Request} req - Request containing department data
+ * @param {import('express').Response} res - Response with created department object
+ */
 const createDepartment = async (req, res) => {
+
   try {
     const department = await prisma.department.create({ data: req.body });
     res.json(department);
