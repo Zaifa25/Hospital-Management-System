@@ -667,7 +667,7 @@ export const entityConfigs: Record<string, EntityConfig> = {
     single: "Employee",
     description: "Manage hospital staff, designations, and salaries.",
     endpoint: "/employees",
-    defaults: { name: "", email: "", phone: "", cnic: "", type: "Nurse", designation: "Senior Nurse", departmentId: 1, salary: 50000, status: "active", address: "" },
+    defaults: { name: "", email: "", phone: "", cnic: "", type: "Nurse", designation: "Senior Nurse", departmentId: "", salary: 50000, status: "active", address: "", password: "" },
     schema: z.object({
       id: z.any().optional(),
       name: z.string().min(2, "Name is required"),
@@ -676,14 +676,16 @@ export const entityConfigs: Record<string, EntityConfig> = {
       cnic: z.string().optional(),
       type: z.string().min(1),
       designation: z.string().min(1),
-      departmentId: z.coerce.number().optional(),
+      departmentId: z.any().optional().nullable(),
       salary: z.coerce.number().min(0),
       status: z.enum(["active", "on_leave", "resigned"]),
       address: z.string().optional(),
+      password: z.string().optional().nullable(),
     }),
     fields: [
       { name: "name", label: "Employee Name", placeholder: "Full Name" },
       { name: "email", label: "Email", inputType: "email", placeholder: "employee@hospital.com" },
+      { name: "password", label: "Login Password", inputType: "password", placeholder: "Leave blank for default (Employee123!)" },
       { name: "phone", label: "Phone", placeholder: "0300-1234567" },
       { name: "cnic", label: "CNIC", placeholder: "35202-1234567-1" },
       {
@@ -700,6 +702,13 @@ export const entityConfigs: Record<string, EntityConfig> = {
         ],
       },
       { name: "designation", label: "Designation", placeholder: "Senior Nurse, Pharmacist..." },
+      { 
+        name: "departmentId", 
+        label: "Department", 
+        type: "select", 
+        placeholder: "Select Department (Optional)",
+        options: [] 
+      },
       { name: "salary", label: "Basic Salary (PKR)", type: "number", inputType: "number", coerce: (v) => Number(v) },
       {
         name: "status",

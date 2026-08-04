@@ -139,6 +139,7 @@ model Role {
   DSAProfile   DSAProfile[]
   Receptionist Receptionist[]
   HRProfile    HRProfile[]
+  Employee     Employee[]
 }
 
 model Receptionist {
@@ -171,6 +172,8 @@ model Employee {
   id           Int          @id @default(autoincrement())
   name         String
   email        String       @unique
+  password     String?
+  roleId       Int          @default(6)
   phone        String
   cnic         String?
   type         String       // Doctor, Nurse, Staff, Receptionist, Admin, Technician
@@ -184,6 +187,7 @@ model Employee {
   attendances  Attendance[]
   payrolls     Payroll[]
   department   Department?  @relation(fields: [departmentId], references: [id])
+  role         Role         @relation(fields: [roleId], references: [id])
 }
 
 model Attendance {

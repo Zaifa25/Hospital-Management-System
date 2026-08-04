@@ -67,6 +67,8 @@ const adminLogin = async (req, res) => {
     user = await prisma.hRProfile.findUnique({ where: { email } });
   } else if (role === 'dsa') {
     user = await prisma.dSAProfile.findUnique({ where: { email } });
+  } else if (role === 'employee') {
+    user = await prisma.employee.findUnique({ where: { email } });
   } else {
     // Fallback if role is not provided
     user = await prisma.admin.findUnique({ where: { email } });
@@ -74,14 +76,19 @@ const adminLogin = async (req, res) => {
     if (!user) user = await prisma.receptionist.findUnique({ where: { email } });
     if (!user) user = await prisma.hRProfile.findUnique({ where: { email } });
     if (!user) user = await prisma.dSAProfile.findUnique({ where: { email } });
+    if (!user) user = await prisma.employee.findUnique({ where: { email } });
   }
 
   if (!user) return res.status(401).json({ message: 'Invalid email or password' });
 
+  if (!user.password) {
+    return res.status(401).json({ message: 'Account does not have a password configured. Please contact HR.' });
+  }
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
-  const token = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  const token = jwt.sign({ id: user.id, roleId: user.roleId || 6 }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
   res.json({ token, admin: user });
 };

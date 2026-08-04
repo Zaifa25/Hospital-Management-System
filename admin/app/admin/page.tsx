@@ -5,12 +5,21 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { MetricsCards } from "@/components/analytics/metrics-cards"
 import { ClinicCharts } from "@/components/analytics/clinic-charts"
 import { Button } from "@/components/ui/button"
+import { useAuth, isEmployee } from "@/hooks/use-auth"
 import { useDashboardStats } from "@/hooks/use-dashboard-stats"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 export default function AdminDashboardPage() {
   const { stats, loading } = useDashboardStats()
+  const { user } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    if (user && isEmployee(user)) {
+      router.replace("/admin/my-attendance")
+    }
+  }, [user, router])
 
   return (
     <div className="space-y-6">

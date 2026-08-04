@@ -83,6 +83,13 @@ export function EntityForm({
           ...values,
           employeeId: Number(values.employeeId),
         }
+      } else if (config.key === "employees") {
+        data = {
+          ...values,
+          departmentId: (values.departmentId && values.departmentId !== "") ? Number(values.departmentId) : undefined,
+          salary: values.salary ? Number(values.salary) : 0,
+          password: values.password || undefined,
+        }
       }
 
       console.log('Sending data to server:', data) // Debug log

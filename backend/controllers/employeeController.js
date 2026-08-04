@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const prisma = require('../config/db');
 
 /**
@@ -42,13 +43,31 @@ const getEmployeeById = async (req, res) => {
 const createEmployee = async (req, res) => {
   try {
     const data = { ...req.body };
-    if (data.departmentId) data.departmentId = Number(data.departmentId);
-    if (data.salary) data.salary = Number(data.salary);
-    if (data.joiningDate) data.joiningDate = new Date(data.joiningDate);
+    if (data.departmentId !== undefined && data.departmentId !== null && data.departmentId !== '') {
+      data.departmentId = Number(data.departmentId);
+    } else {
+      data.departmentId = null;
+    }
     
+    if (data.salary !== undefined && data.salary !== null && data.salary !== '') {
+      data.salary = Number(data.salary);
+    } else {
+      data.salary = 0;
+    }
+
+    if (data.joiningDate) {
+      data.joiningDate = new Date(data.joiningDate);
+    }
+    
+    // Hash password or provide default
+    const rawPassword = (data.password && data.password.trim()) ? data.password : 'Employee123!';
+    data.password = await bcrypt.hash(rawPassword, 10);
+    data.roleId = 6;
+
     const employee = await prisma.employee.create({ data });
     res.status(201).json(employee);
   } catch (err) {
+    console.error('Create Employee error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -61,16 +80,40 @@ const updateEmployee = async (req, res) => {
   const { id } = req.params;
   try {
     const data = { ...req.body };
-    if (data.departmentId) data.departmentId = Number(data.departmentId);
-    if (data.salary) data.salary = Number(data.salary);
-    if (data.joiningDate) data.joiningDate = new Date(data.joiningDate);
+    if (data.departmentId !== undefined && data.departmentId !== null && data.departmentId !== '') {
+      data.departmentId = Number(data.departmentId);
+    } else {
+      data.departmentId = null;
+    }
+
+    if (data.salary !== undefined && data.salary !== null && data.salary !== '') {
+      data.salary = Number(data.salary);
+    }
+
+    if (data.joiningDate) {
+      data.joiningDate = new Date(data.joiningDate);
+    }
     
+    if (data.password && data.password.trim()) {
+      data.password = await bcrypt.hash(data.password, 10);
+    } else {
+      delete data.password;
+    }
+
+    // Remove immutable fields if present in req.body
+    delete data.id;
+    delete data.createdAt;
+    delete data.department;
+    delete data.attendances;
+    delete data.payrolls;
+
     const updated = await prisma.employee.update({
       where: { id: parseInt(id) },
       data
     });
     res.json(updated);
   } catch (err) {
+    console.error('Update Employee error:', err);
     res.status(500).json({ message: err.message });
   }
 };

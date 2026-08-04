@@ -25,7 +25,7 @@ function getApiBaseUrl() {
 }
 
 const schema = z.object({
-  role: z.enum(["admin", "doctor", "receptionist", "hr"]),
+  role: z.enum(["admin", "doctor", "receptionist", "hr", "employee"]),
   email: z.string().email(),
   password: z.string().min(6, "Password must be at least 6 characters"),
 })
@@ -50,17 +50,19 @@ export function SignInForm() {
       const res = await axios.post(`${getApiBaseUrl()}/api/auth/login`, values)
       
       const admin = res.data.admin
-      const roleMap: Record<number, "admin" | "doctor" | "receptionist" | "hr"> = {
+      const roleMap: Record<number, "admin" | "doctor" | "receptionist" | "hr" | "employee"> = {
         1: "admin",
         2: "doctor",
         4: "receptionist",
         5: "hr",
+        6: "employee",
       }
-      const role = roleMap[admin?.roleId ?? 1] || "admin"
+      const role = roleMap[admin?.roleId ?? 6] || values.role || "employee"
 
       setToken(res.data.token, { 
+        id: admin?.id,
         role, 
-        roleId: admin?.roleId ?? 1,
+        roleId: admin?.roleId ?? 6,
         email: admin?.email ?? values.email, 
         name: admin?.name 
       })
@@ -80,7 +82,7 @@ export function SignInForm() {
         <Label htmlFor="role">Sign in as</Label>
         <Select
           value={watch("role")}
-          onValueChange={(val: "admin" | "doctor" | "receptionist" | "hr") => setValue("role", val, { shouldValidate: true })}
+          onValueChange={(val: "admin" | "doctor" | "receptionist" | "hr" | "employee") => setValue("role", val, { shouldValidate: true })}
         >
           <SelectTrigger id="role">
             <SelectValue placeholder="Select Role" />
@@ -88,6 +90,7 @@ export function SignInForm() {
           <SelectContent>
             <SelectItem value="admin">Admin</SelectItem>
             <SelectItem value="hr">HR Manager</SelectItem>
+            <SelectItem value="employee">Employee / Staff</SelectItem>
             <SelectItem value="doctor">Doctor</SelectItem>
             <SelectItem value="receptionist">Receptionist</SelectItem>
           </SelectContent>

@@ -126,11 +126,141 @@ const markBulkAttendance = async (req, res) => {
   }
 };
 
+/**
+ * Get today's attendance for a specific employee.
+ * @route GET /api/attendance/employee/:employeeId/today
+ */
+const getEmployeeTodayAttendance = async (req, res) => {
+  const { employeeId } = req.params;
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const attendance = await prisma.attendance.findFirst({
+      where: {
+        employeeId: parseInt(employeeId),
+        date: {
+          gte: todayStart,
+          lte: todayEnd,
+        },
+      },
+    });
+
+    res.json(attendance || null);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * Self mark attendance (Check In or Check Out) for an employee.
+ * @route POST /api/attendance/employee/mark
+ */
+const markEmployeeSelfAttendance = async (req, res) => {
+  const { employeeId, action, notes } = req.body; // action: 'checkIn' | 'checkOut'
+  try {
+    if (!employeeId) {
+      return res.status(400).json({ message: 'employeeId is required' });
+    }
+
+    const empId = parseInt(employeeId);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    let attendance = await prisma.attendance.findFirst({
+      where: {
+        employeeId: empId,
+        date: {
+          gte: todayStart,
+          lte: todayEnd,
+        },
+      },
+    });
+
+    if (action === 'checkIn') {
+      if (attendance && attendance.checkIn) {
+        return res.status(400).json({ message: 'You have already checked in today.' });
+      }
+      
+      const status = new Date().getHours() >= 10 ? 'Late' : 'Present';
+
+      if (attendance) {
+        attendance = await prisma.attendance.update({
+          where: { id: attendance.id },
+          data: {
+            checkIn: timeString,
+            status,
+            notes: notes || attendance.notes,
+          },
+        });
+      } else {
+        attendance = await prisma.attendance.create({
+          data: {
+            employeeId: empId,
+            date: new Date(),
+            status,
+            checkIn: timeString,
+            notes,
+          },
+        });
+      }
+      return res.json({ message: 'Checked in successfully!', attendance });
+    } else if (action === 'checkOut') {
+      if (!attendance) {
+        return res.status(400).json({ message: 'You must check in before checking out.' });
+      }
+      if (attendance.checkOut) {
+        return res.status(400).json({ message: 'You have already checked out today.' });
+      }
+
+      attendance = await prisma.attendance.update({
+        where: { id: attendance.id },
+        data: {
+          checkOut: timeString,
+          notes: notes || attendance.notes,
+        },
+      });
+      return res.json({ message: 'Checked out successfully!', attendance });
+    } else {
+      return res.status(400).json({ message: 'Invalid action. Must be checkIn or checkOut.' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * Get attendance history for a specific employee.
+ * @route GET /api/attendance/employee/:employeeId/history
+ */
+const getEmployeeAttendanceHistory = async (req, res) => {
+  const { employeeId } = req.params;
+  try {
+    const history = await prisma.attendance.findMany({
+      where: { employeeId: parseInt(employeeId) },
+      orderBy: { date: 'desc' },
+      take: 60, // Last 60 records
+    });
+    res.json(history);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getAttendances,
   getAttendanceById,
   createAttendance,
   updateAttendance,
   deleteAttendance,
-  markBulkAttendance
+  markBulkAttendance,
+  getEmployeeTodayAttendance,
+  markEmployeeSelfAttendance,
+  getEmployeeAttendanceHistory,
 };

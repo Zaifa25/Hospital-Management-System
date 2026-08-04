@@ -30,11 +30,12 @@ type NavLink = {
 
 const links: NavLink[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/analytics", label: "Analytics", icon: Activity },
+  { href: "/admin/my-attendance", label: "My Attendance", icon: CalendarCheck, allowRoles: [6] },
+  { href: "/admin/analytics", label: "Analytics", icon: Activity, allowRoles: [1, 5] },
   { href: "/admin/doctors", label: "Doctors", icon: Stethoscope, allowRoles: [1] },
   { href: "/admin/receptionists", label: "Receptionists", icon: Users, allowRoles: [1] },
   { href: "/admin/employees", label: "Employees (HR)", icon: Briefcase, allowRoles: [1, 5] },
-  { href: "/admin/attendance", label: "Attendance", icon: CalendarCheck, allowRoles: [1, 5] },
+  { href: "/admin/attendance", label: "Attendance Log", icon: CalendarCheck, allowRoles: [1, 5] },
   { href: "/admin/payroll", label: "Payroll & Salaries", icon: DollarSign, allowRoles: [1, 5] },
   { href: "/admin/patients", label: "Patients", icon: Users, allowRoles: [1, 2, 4] },
   { href: "/admin/appointments", label: "Appointments", icon: CalendarDays, allowRoles: [1, 2, 4] },
@@ -48,6 +49,7 @@ const roleBadge: Record<number, { label: string; color: string }> = {
   2: { label: "Doctor", color: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
   4: { label: "Receptionist", color: "bg-blue-500/10 text-blue-600 border-blue-200" },
   5: { label: "HR Manager", color: "bg-purple-500/10 text-purple-600 border-purple-200" },
+  6: { label: "Employee", color: "bg-teal-500/10 text-teal-600 border-teal-200" },
 }
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
