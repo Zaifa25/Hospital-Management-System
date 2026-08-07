@@ -7,35 +7,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
-  id        Int         @id @default(autoincrement())
-  email     String      @unique
+model User {
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
   password  String
   name      String
-  roleId    Int         @default(1) // Assuming 1 is the roleId for Admin
-  createdAt DateTime    @default(now())
-  role      Role        @relation(fields: [roleId], references: [id])
+  phone     String?
+  roleId    Int        @default(1)
+  status    String     @default("Active")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt @default(now())
+  role      Role       @relation(fields: [roleId], references: [id])
+  auditLogs AuditLog[]
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  roleId    Int      @default(1)
+  createdAt DateTime @default(now())
+  role      Role     @relation(fields: [roleId], references: [id])
 }
 
 model Doctor {
-  id             Int           @id @default(autoincrement())
-  name           String
-  departmentId   Int
-  email          String        @unique
-  password       String
-  roleId         Int           @default(2) // Assuming 2 is the roleId for Doctor
-  status         String
-  profilePicture String?
-  phone          String?
-  qualification  String?
-  experience     String?
-  address        String?
-  description    String?
-  createdAt      DateTime      @default(now())
-  appointments   Appointment[]
-  department     Department    @relation(fields: [departmentId], references: [id])
-  role           Role          @relation(fields: [roleId], references: [id])
-  // user         User?         @relation("UserDoctor")
+  id                Int                @id @default(autoincrement())
+  name              String
+  departmentId      Int
+  email             String             @unique
+  password          String
+  roleId            Int                @default(2)
+  status            String
+  profilePicture    String?
+  phone             String?
+  qualification     String?
+  experience        String?
+  address           String?
+  description       String?
+  createdAt         DateTime           @default(now())
+  appointments      Appointment[]
+  department        Department         @relation(fields: [departmentId], references: [id])
+  role              Role               @relation(fields: [roleId], references: [id])
+  consultationNotes ConsultationNote[]
+  prescriptions     Prescription[]
+  labOrders         LabOrder[]
+  admissions        Admission[]
 }
 
 model DSAProfile {
@@ -50,29 +67,34 @@ model DSAProfile {
   joiningDate   DateTime
   contactNo     String
   status        String
-  roleId       Int      @default(3) // Assuming 3 is the roleId for DSA
-  // user          User?    @relation("UserDSA")
-  role         Role     @relation(fields: [roleId], references: [id])
+  roleId        Int      @default(3)
+  role          Role     @relation(fields: [roleId], references: [id])
 }
 
 model Patient {
-  id            Int           @id @default(autoincrement())
-  mrNo          String        @unique
-  registration  DateTime
-  fullName      String
-  sex           String
-  age           Int
-  maritalStatus String
-  phone         String
-  email         String?
-  occupation    String?
-  address       String
-  membership    String
-  status        String
-  fee           Float
-  createdAt     DateTime      @default(now())
-  appointments  Appointment[]
-  payments      Payment[]
+  id                Int                @id @default(autoincrement())
+  mrNo              String             @unique
+  registration      DateTime
+  fullName          String
+  sex               String
+  age               Int
+  maritalStatus     String
+  phone             String
+  email             String?
+  occupation        String?
+  address           String
+  membership        String
+  status            String
+  fee               Float
+  createdAt         DateTime           @default(now())
+  appointments      Appointment[]
+  payments          Payment[]
+  vitals            Vitals[]
+  consultationNotes ConsultationNote[]
+  prescriptions     Prescription[]
+  labOrders         LabOrder[]
+  pharmacySales     PharmacySale[]
+  admissions        Admission[]
 }
 
 model Appointment {
@@ -129,11 +151,13 @@ model Department {
   doctors         Doctor[]
   procedures      Procedure[]
   employees       Employee[]
+  labTests        LabTest[]
 }
 
 model Role {
   id           Int            @id @default(autoincrement())
   name         String         @unique
+  users        User[]
   Doctor       Doctor[]
   Admin        Admin[]
   DSAProfile   DSAProfile[]
@@ -176,12 +200,12 @@ model Employee {
   roleId       Int          @default(6)
   phone        String
   cnic         String?
-  type         String       // Doctor, Nurse, Staff, Receptionist, Admin, Technician
+  type         String
   designation  String
   departmentId Int?
   salary       Float
   joiningDate  DateTime     @default(now())
-  status       String       @default("active") // active, on_leave, resigned
+  status       String       @default("active")
   address      String?
   createdAt    DateTime     @default(now())
   attendances  Attendance[]
@@ -194,7 +218,7 @@ model Attendance {
   id         Int      @id @default(autoincrement())
   employeeId Int
   date       DateTime @default(now())
-  status     String   // Present, Absent, Late, Half-day, On Leave
+  status     String
   checkIn    String?
   checkOut   String?
   notes      String?
@@ -203,15 +227,181 @@ model Attendance {
 }
 
 model Payroll {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   employeeId  Int
-  month       String   // e.g. "July 2026"
+  month       String
   basicSalary Float
-  bonus       Float    @default(0)
-  deductions  Float    @default(0)
+  bonus       Float     @default(0)
+  deductions  Float     @default(0)
   netSalary   Float
-  status      String   @default("Pending") // Pending, Paid
+  status      String    @default("Pending")
   paymentDate DateTime?
-  createdAt   DateTime @default(now())
-  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
+
+// ==========================================
+// CLINICAL & EHR MODULES
+// ==========================================
+
+model Vitals {
+  id          Int      @id @default(autoincrement())
+  patientId   Int
+  bpSystolic  Int?
+  bpDiastolic Int?
+  pulse       Int?
+  temperature Float?
+  spo2        Int?
+  weight      Float?
+  height      Float?
+  recordedAt  DateTime @default(now())
+  recordedBy  String?
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model ConsultationNote {
+  id             Int      @id @default(autoincrement())
+  patientId      Int
+  doctorId       Int
+  appointmentId Int?
+  chiefComplaint String
+  diagnosis      String
+  icd10Code      String?
+  clinicalNotes  String?
+  createdAt      DateTime @default(now())
+  patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor         Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+}
+
+model Prescription {
+  id             Int                @id @default(autoincrement())
+  patientId      Int
+  doctorId       Int
+  status         String             @default("Active") // Active, Completed, Cancelled
+  createdAt      DateTime           @default(now())
+  patient        Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor         Doctor             @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  items          PrescriptionItem[]
+  pharmacySales  PharmacySale[]
+}
+
+model PrescriptionItem {
+  id             Int          @id @default(autoincrement())
+  prescriptionId Int
+  medicineName   String
+  dosage         String       // e.g. "500mg"
+  frequency      String       // e.g. "1-0-1 (Twice daily)"
+  duration       String       // e.g. "5 days"
+  instructions   String?      // e.g. "Take after food"
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// PHARMACY & LAB (LIS) MODULES
+// ==========================================
+
+model Medicine {
+  id            Int      @id @default(autoincrement())
+  name          String
+  genericName   String?
+  category      String   // Tablet, Syrup, Injection, Ointment, etc.
+  batchNo       String
+  stockQuantity Int      @default(0)
+  unitPrice     Float
+  expiryDate    DateTime
+  status        String   @default("Available") // Available, Out of Stock, Expired
+  createdAt     DateTime @default(now())
+}
+
+model PharmacySale {
+  id             Int           @id @default(autoincrement())
+  patientId      Int
+  prescriptionId Int?
+  totalAmount    Float
+  paidAmount     Float
+  status         String        @default("Completed")
+  createdAt      DateTime      @default(now())
+  patient        Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
+}
+
+model LabTest {
+  id             Int        @id @default(autoincrement())
+  testCode       String     @unique
+  testName       String
+  departmentId   Int
+  price          Float
+  referenceRange String?
+  status         String     @default("Active")
+  department     Department @relation(fields: [departmentId], references: [id])
+  labOrders      LabOrder[]
+}
+
+model LabOrder {
+  id            Int      @id @default(autoincrement())
+  patientId     Int
+  doctorId      Int
+  testId        Int
+  sampleStatus  String   @default("Pending") // Pending, Collected, Processing, Completed
+  resultSummary String?
+  reportUrl     String?
+  status        String   @default("Ordered") // Ordered, In Progress, Completed
+  createdAt     DateTime @default(now())
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor        Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  test          LabTest  @relation(fields: [testId], references: [id])
+}
+
+// ==========================================
+// INPATIENT (IPD) & WARD/BED MODULES
+// ==========================================
+
+model Ward {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  type      String   // General, Semi-Private, Private, ICU, OT
+  totalBeds Int
+  dailyRate Float
+  status    String   @default("Active")
+  beds      Bed[]
+}
+
+model Bed {
+  id         Int         @id @default(autoincrement())
+  wardId     Int
+  bedNumber  String
+  status     String      @default("Available") // Available, Occupied, Maintenance
+  ward       Ward        @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  admissions Admission[]
+}
+
+model Admission {
+  id               Int       @id @default(autoincrement())
+  patientId        Int
+  bedId            Int
+  admittingDoctorId Int
+  admissionDate    DateTime  @default(now())
+  dischargeDate    DateTime?
+  dischargeSummary String?
+  status           String    @default("Admitted") // Admitted, Discharged
+  patient          Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  bed              Bed       @relation(fields: [bedId], references: [id])
+  admittingDoctor  Doctor    @relation(fields: [admittingDoctorId], references: [id])
+}
+
+// ==========================================
+// AUDIT & SECURITY MODULE
+// ==========================================
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  userEmail String?
+  action    String   // e.g. READ_PATIENT, WRITE_PRESCRIPTION, LOGIN
+  resource  String   // e.g. Patient #12, LabOrder #5
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+

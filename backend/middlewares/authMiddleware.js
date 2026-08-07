@@ -33,25 +33,21 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Unauthorized: Token missing user id' });
     }
 
-    // Check user exists based on roleId
-    let user = null;
+    // Fetch user from unified User table, fallback to role-specific tables if necessary
     const userId = Number(decoded.id);
-    const roleId = Number(decoded.roleId);
+    let user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
 
-    if (roleId === 1) {
-      user = await prisma.admin.findUnique({ where: { id: userId } });
-    } else if (roleId === 2) {
-      user = await prisma.doctor.findUnique({ where: { id: userId } });
-    } else if (roleId === 3) {
-      user = await prisma.dSAProfile.findUnique({ where: { id: userId } });
-    } else if (roleId === 4) {
-      user = await prisma.receptionist.findUnique({ where: { id: userId } });
-    } else if (roleId === 5) {
-      user = await prisma.hRProfile.findUnique({ where: { id: userId } });
-    } else {
-      user = await prisma.admin.findUnique({ where: { id: userId } }) || 
-             await prisma.doctor.findUnique({ where: { id: userId } }) ||
-             await prisma.hRProfile.findUnique({ where: { id: userId } });
+    // Backward compatibility fallback for legacy table user IDs if User record not yet migrated
+    if (!user) {
+      const roleId = Number(decoded.roleId);
+      if (roleId === 1) user = await prisma.admin.findUnique({ where: { id: userId } });
+      else if (roleId === 2) user = await prisma.doctor.findUnique({ where: { id: userId } });
+      else if (roleId === 3) user = await prisma.dSAProfile.findUnique({ where: { id: userId } });
+      else if (roleId === 4) user = await prisma.receptionist.findUnique({ where: { id: userId } });
+      else if (roleId === 5) user = await prisma.hRProfile.findUnique({ where: { id: userId } });
     }
 
     if (!user) return res.status(401).json({ message: 'Unauthorized: User not found' });

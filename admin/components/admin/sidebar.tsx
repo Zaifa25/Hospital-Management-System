@@ -18,6 +18,8 @@ import {
   Briefcase,
   CalendarCheck,
   DollarSign,
+  FlaskConical,
+  Pill,
 } from "lucide-react"
 
 type NavLink = {
@@ -41,6 +43,9 @@ const links: NavLink[] = [
   { href: "/admin/appointments", label: "Appointments", icon: CalendarDays, allowRoles: [1, 2, 4] },
   { href: "/admin/payments", label: "Payments", icon: CreditCard, allowRoles: [1, 3] },
   { href: "/admin/departments", label: "Departments", icon: Building2, allowRoles: [1] },
+  { href: "/admin/ehr", label: "EHR & Prescriptions", icon: Activity, allowRoles: [1, 2, 4] },
+  { href: "/admin/pharmacy", label: "Pharmacy Stock", icon: Pill, allowRoles: [1, 2, 4] },
+  { href: "/admin/lab", label: "Lab (LIS) Orders", icon: FlaskConical, allowRoles: [1, 2, 4] },
   { href: "/admin/profile", label: "Profile", icon: UserCog },
 ]
 

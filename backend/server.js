@@ -64,6 +64,12 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+const ehrRoutes = require('./routes/ehrRoutes');
+const pharmacyRoutes = require('./routes/pharmacyRoutes');
+const labRoutes = require('./routes/labRoutes');
+const ipdRoutes = require('./routes/ipdRoutes');
+const auditRoutes = require('./routes/auditRoutes');
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
@@ -75,6 +81,11 @@ app.use('/api/receptionists', receptionistRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/payrolls', payrollRoutes);
+app.use('/api/ehr', ehrRoutes);
+app.use('/api/pharmacy', pharmacyRoutes);
+app.use('/api/lab', labRoutes);
+app.use('/api/ipd', ipdRoutes);
+app.use('/api/audit', auditRoutes);
 const errorHandler = require('./middlewares/errorMiddleware');
 app.use(errorHandler);
 

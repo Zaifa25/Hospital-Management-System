@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/db');
+const { logAudit } = require('./auditController');
 
 /**
  * Register a new Admin or Staff user account.
@@ -55,28 +56,33 @@ const registerAdmin = async (req, res) => {
 const adminLogin = async (req, res) => {
   const { email, password, role } = req.body;
 
-  let user = null;
+  let user = await prisma.user.findUnique({
+    where: { email },
+    include: { role: true },
+  });
 
-  if (role === 'admin') {
-    user = await prisma.admin.findUnique({ where: { email } });
-  } else if (role === 'doctor') {
-    user = await prisma.doctor.findUnique({ where: { email } });
-  } else if (role === 'receptionist') {
-    user = await prisma.receptionist.findUnique({ where: { email } });
-  } else if (role === 'hr') {
-    user = await prisma.hRProfile.findUnique({ where: { email } });
-  } else if (role === 'dsa') {
-    user = await prisma.dSAProfile.findUnique({ where: { email } });
-  } else if (role === 'employee') {
-    user = await prisma.employee.findUnique({ where: { email } });
-  } else {
-    // Fallback if role is not provided
-    user = await prisma.admin.findUnique({ where: { email } });
-    if (!user) user = await prisma.doctor.findUnique({ where: { email } });
-    if (!user) user = await prisma.receptionist.findUnique({ where: { email } });
-    if (!user) user = await prisma.hRProfile.findUnique({ where: { email } });
-    if (!user) user = await prisma.dSAProfile.findUnique({ where: { email } });
-    if (!user) user = await prisma.employee.findUnique({ where: { email } });
+  // Fallback to legacy tables if not found in User table
+  if (!user) {
+    if (role === 'admin') {
+      user = await prisma.admin.findUnique({ where: { email } });
+    } else if (role === 'doctor') {
+      user = await prisma.doctor.findUnique({ where: { email } });
+    } else if (role === 'receptionist') {
+      user = await prisma.receptionist.findUnique({ where: { email } });
+    } else if (role === 'hr') {
+      user = await prisma.hRProfile.findUnique({ where: { email } });
+    } else if (role === 'dsa') {
+      user = await prisma.dSAProfile.findUnique({ where: { email } });
+    } else if (role === 'employee') {
+      user = await prisma.employee.findUnique({ where: { email } });
+    } else {
+      user = await prisma.admin.findUnique({ where: { email } }) ||
+             await prisma.doctor.findUnique({ where: { email } }) ||
+             await prisma.receptionist.findUnique({ where: { email } }) ||
+             await prisma.hRProfile.findUnique({ where: { email } }) ||
+             await prisma.dSAProfile.findUnique({ where: { email } }) ||
+             await prisma.employee.findUnique({ where: { email } });
+    }
   }
 
   if (!user) return res.status(401).json({ message: 'Invalid email or password' });
@@ -88,7 +94,15 @@ const adminLogin = async (req, res) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
-  const token = jwt.sign({ id: user.id, roleId: user.roleId || 6 }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  const token = jwt.sign(
+    { id: user.id, roleId: user.roleId || 6, roleName: user.role?.name || role },
+    process.env.JWT_SECRET,
+    { expiresIn: '1d' }
+  );
+
+  // Record login audit event
+  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket?.remoteAddress || null;
+  await logAudit(user.id, user.email, 'LOGIN', `User #${user.id} (${user.email})`, `Role: ${user.role?.name || role}`, ip);
 
   res.json({ token, admin: user });
 };
